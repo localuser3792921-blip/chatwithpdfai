@@ -2,7 +2,18 @@
 
 > **Living document.** Updated every time we ship or defer something. Last updated 2026-05-28.
 >
-> This is the single source of truth for what the product is, what's built, and what's next.
+> This is the single source of truth for **what the product is, what's built, and what's next**.
+
+## Related documents
+
+| Doc | Purpose | Where |
+| --- | --- | --- |
+| `REQUIREMENTS.md` (this file) | Product scope, architecture, roadmap, decisions | repo root |
+| `HOSTING-ANALYSIS.md` | Hostinger plan analysis, bottlenecks, upgrade triggers, margin tactics, 6-month scaling outlook | repo root |
+| `DEPLOYMENT.md` | How auto-deploy works, troubleshooting | repo root |
+| `README.md` | Quick project overview, local dev | repo root |
+| `.cowork-private/OPERATIONS.md` | Server paths, gotchas, credentials reference (gitignored) | local only |
+| `.cowork-private/credentials.env` | Real passwords for Claude sessions to read (gitignored) | local only |
 
 ---
 
@@ -87,9 +98,13 @@ The actual chat-with-PDF product. Build behind a feature flag so we can test wit
 | Library / "my docs" view | ⬜ Planned | `library.html` mockup exists |
 | Document viewer | ⬜ Planned | `document.html` mockup exists |
 | Credit-cost preview before send | ⬜ Planned | UI shows "this query will use ~X credits" before user hits send |
+| **LLM response cache** (margin booster) | ⬜ Planned | Same PDF + same query → serve from cache. +20-40% margin on repeat queries. Cache in MySQL `llm_cache` table keyed by hash. |
+| **Background job queue** (PDF processing) | ⬜ Planned | Long-running PDF extract + embed runs in background; user sees "Processing…" → notified on completion. Prevents 30-sec UI hangs. Implementation: `pg-boss`-like in MySQL or `node-cron` polling. |
+| **Hard API limits** (anti-abuse) | ⬜ Planned | Max 50 MB upload, max 500 pages/PDF, max 100 queries/day per user, rate-limit per IP. Stops one user eating margin. |
+| **Cloudflare in front of site** (free, big margin win) | ⬜ Planned | Free Cloudflare plan → 50%+ bandwidth offload, faster TTFB, DDoS protection. ~1 hour setup. |
 
 ### 🟨 Phase 2 — Operational features
-Email templates, admin tools, monitoring.
+Email templates, admin tools, monitoring. Ships alongside Phase 1.
 
 | Feature | Status | Notes |
 | --- | --- | --- |
@@ -99,6 +114,11 @@ Email templates, admin tools, monitoring.
 | Deletion confirmation email | ⬜ Planned | `emails/deletion.html` mockup exists |
 | Admin view for contact submissions | ⬜ Planned | Internal-only dashboard |
 | Basic analytics (`analytics.html` mockup exists) | ⬜ Planned | Aggregate usage stats |
+| **Uptime monitoring** (UptimeRobot, free) | ⬜ Planned | Ping site every 5 min; alert on downtime. See HOSTING-ANALYSIS.md §9. |
+| **Error tracking** (Sentry free tier, 5K errors/mo) | ⬜ Planned | Catch unhandled exceptions in API routes; debug from dashboard |
+| **Resource trend logging** (disk, RAM, DB size) | ⬜ Planned | Daily cron → log to `infra_metrics` table → admin dashboard. Trigger alerts before hitting upgrade thresholds. |
+| **MariaDB slow query log** | ⬜ Planned | Enable on the server; review weekly; add indexes proactively |
+| **Email send counter** | ⬜ Planned | Track in `emails_sent`; alert at 400/day (before 500/day Hostinger SMTP limit) |
 
 ### 🟧 Phase 3 — Auth (deferred per user request 2026-05-28)
 | Feature | Status | Notes |
@@ -190,6 +210,12 @@ Stuff that matters after launch.
 | 2026-05-28 | **No free tier** — every action costs credits | User explicit: "No free, we need to maintain maximum profits percentage" |
 | 2026-05-28 | Multi-PDF chat: charge credits proportional to LLM tokens consumed | User explicit: "based on LLM provider only we need to charge credits accordingly" |
 | 2026-05-28 | Target gross margin = 70% on LLM costs | User pays ~3.3× our raw provider cost in credits |
+| 2026-05-28 | Stay on Hostinger Premium until ₹50K MRR | See HOSTING-ANALYSIS.md §4 — sufficient for first 1-2K paid users; upgrade only on specific triggers |
+| 2026-05-28 | Cloudflare in front of site from launch | Free, ~50% bandwidth offload, faster TTFB globally, DDoS protection |
+| 2026-05-28 | LLM response caching is a Phase 1 feature, not optional | Direct margin impact — 20-40% margin gain on repeat queries |
+| 2026-05-28 | Hard API limits enforced before launch | Max 50 MB upload / 500 pages-per-PDF / 100 queries-per-user-per-day; rate limit per IP |
+| 2026-05-28 | Heavy work runs async in background queue | PDF processing must not block the UI; user-facing requests stay <1s |
+| 2026-05-28 | Monitoring (uptime + error tracking + resource trends) ships with Phase 2 | Can't react to limits without measuring them first |
 
 ---
 
@@ -225,68 +251,4 @@ Record actual cost in `llm_usage` table → deduct credits with markup
 | --- | --- | --- | --- | --- | --- |
 | Google | `gemini-2.5-flash` | ✅ | ~$0.075 | ~$0.30 | **Default for text + vision** — cheapest capable |
 | Anthropic | `claude-haiku-4-5` | ✅ | ~$0.25 | ~$1.25 | Fallback when Gemini rate-limited |
-| OpenAI | `gpt-4o-mini` | ✅ | ~$0.15 | ~$0.60 | Fallback #2 |
-| Google | `gemini-2.5-pro` | ✅ | ~$1.25 | ~$5 | Complex multi-doc reasoning |
-| Anthropic | `claude-sonnet-4-6` | ✅ | ~$3 | ~$15 | Premium tier; long-form analysis |
-| OpenAI | `gpt-4o` | ✅ | ~$2.50 | ~$10 | Premium fallback |
-
-### Credit pricing model
-
-- Track actual provider cost per query in `llm_usage` table (provider, model, input_tokens, output_tokens, cost_inr)
-- Set **target gross margin = 70%** (i.e., user pays ~3.3× our cost in credits)
-- Convert cost → credits at fixed rate: 1 credit = ₹2 of LLM spend at our cost (so 1 credit ≈ ₹6.66 retail = our ₹3.99–₹7.98 per-document range)
-- Multi-PDF queries cost more credits proportional to combined token count
-- Vision/OCR queries cost more credits (vision tokens are pricier)
-- Display "this query will cost X credits" before sending to user
-
-### `lib/llm/router.js` responsibility
-
-1. Accept `{ task: 'chat'|'embed'|'ocr', pdfs: [...], messages: [...], userTier: 'free|paid' }`
-2. Classify task constraints (vision needed? token estimate? multi-doc?)
-3. Pick provider+model
-4. Call provider SDK
-5. Log to `llm_usage`
-6. Return response + computed credit cost
-7. On error → exponential backoff → fallback provider
-
----
-
-## Embedding strategy
-
-**Decided:** **Per-page** embeddings.
-
-- One embedding per PDF page → simple, easy to cite ("answer from page 5")
-- Stored in MariaDB as `VECTOR(1536)` column on a `pdf_pages` table
-- Retrieval: `ORDER BY VEC_DISTANCE_COSINE(embedding, query_embedding) LIMIT 5`
-- If a page has too much text for one embedding (>8K tokens), the page is split into 2-3 chunks but all chunks share the same `page_number` for clean citation
-
-### Storage layout
-
-```sql
-pdf_documents     (id, user_id, original_filename, disk_path, page_count, status, created_at)
-pdf_pages         (id, document_id, page_number, text, embedding VECTOR(1536), created_at, INDEX vec_idx USING HNSW)
-chat_conversations (id, user_id, primary_document_id, title, created_at)
-chat_messages     (id, conversation_id, role, content, cited_page_ids JSON, credits_used, llm_provider, llm_model, created_at)
-llm_usage         (id, user_id, conversation_id, provider, model, input_tokens, output_tokens, cost_inr, credits_charged, created_at)
-```
-
-### File storage layout (Hostinger disk)
-
-```
-~/domains/chatwithpdfai.com/uploads/
-  └── <user_id>/
-      └── <document_uuid>.pdf
-```
-
-- Path stored in `pdf_documents.disk_path`
-- Permissions: 600 (user-read only)
-- Daily backup via Hostinger (already covered by hosting plan)
-
----
-
-## Maintenance notes for this document
-
-- Update the **Status** column of every table whenever a feature ships
-- Move items between phases as priorities shift (record the date in **Decisions made**)
-- Add new **Open questions** as they come up; mark them resolved by moving the answer to **Decisions made**
-- Don't include credentials, IPs, or anything from `.cowork-private/` here — this file IS in the repo
+| Open
