@@ -91,6 +91,7 @@ function Sidebar({ docs, activeId, onPick, onNew, onUpload }) {
 }
 
 function DocViewer({ docId, jumpPage }) {
+  const [view, setView] = useState('pdf');
   const [data, setData] = useState(null);
   const [err, setErr] = useState('');
   const ref = useRef(null);
@@ -101,27 +102,36 @@ function DocViewer({ docId, jumpPage }) {
     return () => { live = false; };
   }, [docId]);
   useEffect(() => {
-    if (jumpPage && ref.current) { const el = ref.current.querySelector(`[data-page="${jumpPage}"]`); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-  }, [jumpPage, data]);
+    if (view === 'text' && jumpPage && ref.current) { const el = ref.current.querySelector(`[data-page="${jumpPage}"]`); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  }, [jumpPage, data, view]);
   return (
     <section style={{ flex: '1.2', borderRight: '1px solid var(--stroke-1)', background: 'rgba(5,6,20,0.4)', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
       <div style={{ padding: '10px 18px', borderBottom: '1px solid var(--stroke-1)', background: 'rgba(5,6,20,0.6)', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
         <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{data?.document?.filename || 'Document'}</span>
         <div style={{ flex: 1 }}></div>
+        <div style={{ display: 'flex', gap: 4 }}>
+          <button onClick={() => setView('pdf')} className={view === 'pdf' ? 'btn btn-iris btn-sm' : 'btn btn-glass btn-sm'} style={{ padding: '4px 10px' }}>PDF</button>
+          <button onClick={() => setView('text')} className={view === 'text' ? 'btn btn-iris btn-sm' : 'btn btn-glass btn-sm'} style={{ padding: '4px 10px' }}>Text</button>
+        </div>
         {data && <span className="mono" style={{ fontSize: 11, color: 'var(--text-3)' }}>{data.pages.length} PAGES</span>}
       </div>
-      <div ref={ref} style={{ flex: 1, overflow: 'auto', padding: '24px 18px' }}>
-        {!docId && <div style={{ color: 'var(--text-4)', textAlign: 'center', marginTop: 60 }}>No document selected.</div>}
-        {docId && !data && !err && <div className="mono" style={{ color: 'var(--text-4)', textAlign: 'center', marginTop: 60, fontSize: 12 }}>LOADING DOCUMENT…</div>}
-        {err && <div style={{ color: '#ffb4b4', textAlign: 'center', marginTop: 60 }}>{err}</div>}
-        {data && data.pages.map((p) => (
-          <div key={p.pageNumber} data-page={p.pageNumber} className="glass" style={{ maxWidth: 760, margin: '0 auto 18px', padding: '34px 40px', borderRadius: 'var(--r-lg)', background: jumpPage === p.pageNumber ? 'rgba(183,106,255,0.10)' : 'rgba(255,255,255,0.97)', color: '#0a0a25', fontSize: 13.5, lineHeight: 1.7, border: jumpPage === p.pageNumber ? '2px solid #b76aff' : '1px solid var(--stroke-2)', transition: 'all .35s', whiteSpace: 'pre-wrap' }}>
-            <div className="mono" style={{ fontSize: 9, letterSpacing: '0.14em', color: 'rgba(10,10,37,0.5)', marginBottom: 16, borderBottom: '1px solid rgba(10,10,37,0.15)', paddingBottom: 8, textTransform: 'uppercase' }}>Page {p.pageNumber}</div>
-            {p.text || <span style={{ color: 'rgba(10,10,37,0.4)' }}>(no extractable text on this page)</span>}
-          </div>
-        ))}
-        {data && data.pages.length === 0 && <div style={{ color: 'var(--text-4)', textAlign: 'center', marginTop: 60 }}>This document has no extractable text (it may be image-only).</div>}
-      </div>
+      {!docId ? (
+        <div style={{ color: 'var(--text-4)', textAlign: 'center', marginTop: 60 }}>No document selected.</div>
+      ) : view === 'pdf' ? (
+        <iframe key={docId + '-' + (jumpPage || 1)} title="PDF document" src={`/api/documents/${docId}/file#page=${jumpPage || 1}`} style={{ flex: 1, width: '100%', border: 'none', background: '#fff' }} />
+      ) : (
+        <div ref={ref} style={{ flex: 1, overflow: 'auto', padding: '24px 18px' }}>
+          {!data && !err && <div className="mono" style={{ color: 'var(--text-4)', textAlign: 'center', marginTop: 60, fontSize: 12 }}>LOADING DOCUMENT…</div>}
+          {err && <div style={{ color: '#ffb4b4', textAlign: 'center', marginTop: 60 }}>{err}</div>}
+          {data && data.pages.map((p) => (
+            <div key={p.pageNumber} data-page={p.pageNumber} className="glass" style={{ maxWidth: 760, margin: '0 auto 18px', padding: '34px 40px', borderRadius: 'var(--r-lg)', background: jumpPage === p.pageNumber ? 'rgba(183,106,255,0.10)' : 'rgba(255,255,255,0.97)', color: '#0a0a25', fontSize: 13.5, lineHeight: 1.7, border: jumpPage === p.pageNumber ? '2px solid #b76aff' : '1px solid var(--stroke-2)', transition: 'all .35s', whiteSpace: 'pre-wrap' }}>
+              <div className="mono" style={{ fontSize: 9, letterSpacing: '0.14em', color: 'rgba(10,10,37,0.5)', marginBottom: 16, borderBottom: '1px solid rgba(10,10,37,0.15)', paddingBottom: 8, textTransform: 'uppercase' }}>Page {p.pageNumber}</div>
+              {p.text || <span style={{ color: 'rgba(10,10,37,0.4)' }}>(no extractable text on this page)</span>}
+            </div>
+          ))}
+          {data && data.pages.length === 0 && <div style={{ color: 'var(--text-4)', textAlign: 'center', marginTop: 60 }}>No extractable text (image-only PDF) — use the PDF view.</div>}
+        </div>
+      )}
     </section>
   );
 }
