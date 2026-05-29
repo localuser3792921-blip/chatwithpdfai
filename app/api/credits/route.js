@@ -9,7 +9,8 @@ export async function GET(req) {
   if (!flagOn()) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   try {
     const u = await getCurrentUser(req);
-    const userId = u?.id ?? STUB_USER_ID;
+    if (!u) return NextResponse.json({ error: 'Please sign in' }, { status: 401 });
+    const userId = u.id;
     const [balance, packs] = await Promise.all([getBalance(userId), listPacks()]);
     return NextResponse.json({ ok: true, authenticated: !!u, balance, enforced: creditsEnforced(), packs });
   } catch (e) { console.error('[credits] failed', e); return NextResponse.json({ error: 'Could not load credits' }, { status: 500 }); }

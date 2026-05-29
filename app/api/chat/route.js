@@ -29,7 +29,10 @@ export async function POST(req) {
   if (!ids.length) return NextResponse.json({ error: 'documentId(s) required' }, { status: 400 });
   if (message.length < 2) return NextResponse.json({ error: 'message required' }, { status: 400 });
 
-  const userId = (await getCurrentUser(req))?.id ?? STUB_USER_ID;
+  const _u = await getCurrentUser(req);
+  if (!_u) return NextResponse.json({ error: 'Please sign in to continue' }, { status: 401 });
+  if (!_u.email_verified) return NextResponse.json({ error: 'Please verify your email before using the product' }, { status: 403 });
+  const userId = _u.id;
   if (creditsEnforced()) { const _bal = await getBalance(userId); if (_bal < 1) return NextResponse.json({ error: 'Insufficient credits — buy a pack to continue.' }, { status: 402 }); }
   try {
     const docs = await getReadyDocuments(ids, userId);

@@ -53,7 +53,10 @@ export async function POST(req) {
     return NextResponse.json({ error: 'File is not a valid PDF' }, { status: 415 });
   }
 
-  const userId = (await getCurrentUser(req))?.id ?? STUB_USER_ID;
+  const _u = await getCurrentUser(req);
+  if (!_u) return NextResponse.json({ error: 'Please sign in to continue' }, { status: 401 });
+  if (!_u.email_verified) return NextResponse.json({ error: 'Please verify your email before using the product' }, { status: 403 });
+  const userId = _u.id;
   let documentId;
   try {
     const result = await enqueue(async () => {

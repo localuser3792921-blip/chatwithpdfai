@@ -23,7 +23,9 @@ export async function GET(req) {
   }
 
   try {
-    const userId = (await getCurrentUser(req))?.id ?? STUB_USER_ID;
+    const _u = await getCurrentUser(req);
+    if (!_u) return NextResponse.json({ error: 'Please sign in' }, { status: 401 });
+    const userId = _u.id;
     const rows = await documents.listDocuments(userId);
     const docs = rows.map((r) => ({
       id: r.id,

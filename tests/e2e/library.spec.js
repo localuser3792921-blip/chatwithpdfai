@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
+const { createVerifiedUser } = require('../helpers');
 
 const FX = path.join(__dirname, '..', 'fixtures');
 // Second fixture (reportlab 2-page: "annual revenue 9.8 million"); written if missing.
@@ -19,9 +20,10 @@ async function upload(request, file, name) {
   return (await r.json()).document.id;
 }
 
-test('library lists docs and multi-PDF chat answers across both', async ({ page, request }) => {
-  const a = await upload(request, path.join(FX, 'sample-3page.pdf'), 'invoice.pdf');
-  const b = await upload(request, path.join(FX, 'sample2.pdf'), 'annual.pdf');
+test('library lists docs and multi-PDF chat answers across both', async ({ page }) => {
+  await createVerifiedUser(page);
+  const a = await upload(page.request, path.join(FX, 'sample-3page.pdf'), 'invoice.pdf');
+  const b = await upload(page.request, path.join(FX, 'sample2.pdf'), 'annual.pdf');
 
   await page.goto('/library.html');
   await expect(page.getByTestId('doc-row')).toHaveCount(2);
