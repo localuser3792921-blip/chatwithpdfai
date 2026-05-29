@@ -72,7 +72,7 @@ A **pay-per-document** AI chat product for PDFs. Drop a PDF, ask anything, get c
 | Env vars in hPanel | ✅ | Persistent across deploys |
 | `users` + `sessions` tables (schema only) | ✅ Created | Idle until auth phase resumes |
 | Product schema (migration 003) | ✅ Applied to live DB | `pdf_documents`, `pdf_pages` (`VECTOR(1536)`+cosine index), `chat_conversations`, `chat_messages`, `llm_usage`, `llm_cache`; validated on MariaDB 11.8.6 |
-| Ingest pipeline (upload→extract→embed→store) | 🟡 Built + E2E-tested, not deployed | `/api/documents/upload` behind PRODUCT_MVP flag; real OpenAI embeddings + live vector retrieval verified; Playwright green |
+| Ingest pipeline (upload→extract→embed→store) | ✅ Deployed (gated, auth+verified required) | `/api/documents/upload` behind PRODUCT_MVP flag; real OpenAI embeddings + live vector retrieval verified; Playwright green |
 | SSH key auth from Claude sandbox | ✅ | `~/.cowork-private/hostinger_id_ed25519` |
 | Operational docs (`.cowork-private/OPERATIONS.md`) | ✅ | Server paths, gotchas, credentials reference |
 
@@ -278,6 +278,8 @@ Stuff that matters after launch.
 | 2026-05-29 | M7 (partial): auth brute-force protection — IP rate-limiting on signin/signup/forgot + account lockout (5 fails -> 15-min lock); migration 005 `rate_limits` | Tested live (11 hits -> 429; 5 wrong pw -> locked) |
 | 2026-05-29 | Remaining M7 needs external accounts: Sentry (error tracking) + UptimeRobot (uptime) | Provide DSN/setup to wire; deferred until then |
 | 2026-05-29 | GO-LIVE checklist: add RAZORPAY_*/DB/SMTP/LLM env to hPanel; set PRODUCT_MVP_ENABLED=1 + CREDITS_ENFORCED=1; require verified email; remove STUB_USER_ID fallback; reconcile SOC2/HIPAA copy (legal) | The product is fully built+tested behind the flag; these flip it live |
+| 2026-05-29 | Launch model = **pay-first, no free credits** (at go-live set `CREDITS_ENFORCED=1`, no signup grant) | User decision; simplest paid funnel, avoids free-tier abuse of paid LLM calls |
+| 2026-05-29 | **Launch hardening shipped + deployed (commit `f3daf44`):** product APIs require sign-in (401); `upload`/`chat`/`chat/estimate` also require verified email (403); `documents`/`credits` login-only; `STUB_USER_ID` fallback removed from the auth path | Closes the launch-blocker noted in the M5b row. Verified live (real DB + LLMs): gating 3/3, upload 2/2, chat 1/1, library 1/1. Go-live now = set `PRODUCT_MVP_ENABLED=1` in hPanel |
 
 ---
 
