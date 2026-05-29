@@ -275,6 +275,9 @@ Stuff that matters after launch.
 | 2026-05-29 | M6b shipped: Razorpay payment — order (Orders API) -> Checkout.js -> client signature verify -> webhook (HMAC), idempotent credit top-up; `buy.html` | Tested against Razorpay TEST mode with real signatures (order created, verify +credits, webhook +credits, idempotent, bad-sig rejected). Completes M6. |
 | 2026-05-29 | Razorpay keys are per-account (one MID = one test key), shared across pdfcraftai.com + chatwithpdfai.com | Per Razorpay docs; webhook secret is per-webhook though |
 | 2026-05-29 | Prod needs RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET / RAZORPAY_WEBHOOK_SECRET in hPanel env before payments work live | Same pattern as the other secrets (hPanel, not committed) |
+| 2026-05-29 | M7 (partial): auth brute-force protection — IP rate-limiting on signin/signup/forgot + account lockout (5 fails -> 15-min lock); migration 005 `rate_limits` | Tested live (11 hits -> 429; 5 wrong pw -> locked) |
+| 2026-05-29 | Remaining M7 needs external accounts: Sentry (error tracking) + UptimeRobot (uptime) | Provide DSN/setup to wire; deferred until then |
+| 2026-05-29 | GO-LIVE checklist: add RAZORPAY_*/DB/SMTP/LLM env to hPanel; set PRODUCT_MVP_ENABLED=1 + CREDITS_ENFORCED=1; require verified email; remove STUB_USER_ID fallback; reconcile SOC2/HIPAA copy (legal) | The product is fully built+tested behind the flag; these flip it live |
 
 ---
 

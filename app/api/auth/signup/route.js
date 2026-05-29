@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
 import { query } from '@/lib/db';
-import { isEmail, clip } from '@/lib/validate';
+import { isEmail, clip, getClientIp } from '@/lib/validate';
+import { rateLimit } from '@/lib/ratelimit';
 import { hashPassword, createSession, sessionCookie } from '@/lib/auth';
 import { sendMail } from '@/lib/email';
 export const runtime = 'nodejs';
@@ -9,6 +10,7 @@ export const dynamic = 'force-dynamic';
 function flagOn() { return process.env.PRODUCT_MVP_ENABLED === '1' || process.env.TEST_MODE === '1'; }
 export async function POST(req) {
   if (!flagOn()) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  if (!(await rateLimit({ bucket: 'signup', ip: getClientIp(req), max: 5, windowMin: 60 }))) return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
   let body; try { body = await req.json(); } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
   const email = clip(body.email, 320).toLowerCase();
   const password = typeof body.password === 'string' ? body.password : '';
