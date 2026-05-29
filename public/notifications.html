@@ -23,11 +23,11 @@
   <script type="text/babel">
     const { useState } = React;
     const NOTIFS = [
-      { id: 1, kind: "team", icon: "@", color: "var(--violet-2)", title: "Theo mentioned you in MSA — Acme ↔ Helix Labs", body: "@Maya can you double-check the indemnification carve-outs before the partner review?", when: "5 min ago", unread: true, href: "document.html" },
+      { id: 1, kind: "team", icon: "@", color: "var(--violet-2)", title: "Theo mentioned you in MSA — Acme ↔ Helix Labs", body: "@Maya can you double-check the indemnification carve-outs before the partner review?", when: "5 min ago", unread: true, href: "/library.html" },
       { id: 2, kind: "ai", icon: "✦", color: "var(--green)", title: "Thread re-ran: 'What's new in NVDA Q3?'", body: "The new Q3 10-Q changed two material disclosures since your last check. View the diff.", when: "32 min ago", unread: true, href: "compare.html" },
       { id: 3, kind: "billing", icon: "◉", color: "var(--violet-2)", title: "Practice pack purchased — 400 credits added", body: "Receipt sent to your inbox. Credits never expire.", when: "2 hours ago", unread: true, href: "invoice.html" },
       { id: 4, kind: "security", icon: "🔒", color: "#ffbd2e", title: "New sign-in from Safari on iPhone", body: "From New York, NY. If this wasn't you, change your password.", when: "Today, 9:14 AM", unread: false, href: "account.html" },
-      { id: 5, kind: "system", icon: "↻", color: "var(--text-3)", title: "Document ready: 'ATLAS-2 Phase III Protocol.pdf'", body: "220 pages indexed · auto-summary generated · OCR took 3.4s.", when: "Yesterday", unread: false, href: "document.html" },
+      { id: 5, kind: "system", icon: "↻", color: "var(--text-3)", title: "Document ready: 'ATLAS-2 Phase III Protocol.pdf'", body: "220 pages indexed · auto-summary generated · OCR took 3.4s.", when: "Yesterday", unread: false, href: "/library.html" },
       { id: 6, kind: "product", icon: "★", color: "var(--green)", title: "New feature: Clause-diff v2 is live", body: "Diff against a folder of standard templates, not just one. See what's new.", when: "May 19", unread: false, href: "changelog.html" },
       { id: 7, kind: "team", icon: "+", color: "var(--violet-2)", title: "Iris Lee joined your workspace", body: "Iris accepted your invite and is now a Viewer.", when: "May 17", unread: false, href: "account.html" },
       { id: 8, kind: "ai", icon: "✦", color: "var(--green)", title: "Auto-summary refreshed for 4 documents", body: "We re-summarized 4 docs after a model update. Citations re-verified.", when: "May 15", unread: false, href: "library.html" },

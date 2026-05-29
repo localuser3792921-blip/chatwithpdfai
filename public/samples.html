@@ -37,7 +37,7 @@
             <div className="spread">
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }} className="samp-grid">
                 {SAMPLES.map(s => (
-                  <a key={s.name} href="app.html" className="glass hover-glow" style={{ padding: 0, borderRadius: "var(--r-xl)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                  <a key={s.name} href="/signup.html" className="glass hover-glow" style={{ padding: 0, borderRadius: "var(--r-xl)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
                     <div style={{ aspectRatio: "1.4", background: s.grad, padding: 20, position: "relative", borderBottom: "1px solid var(--stroke-1)" }}>
                       <span className="pill" style={{ padding: "3px 9px", fontSize: 10, position: "absolute", top: 14, left: 14 }}>{s.tag}</span>
                       <div className="mono" style={{ position: "absolute", top: 18, right: 16, fontSize: 10, color: "rgba(255,255,255,0.55)", letterSpacing: "0.1em" }}>{s.pages} pp</div>
@@ -64,7 +64,7 @@
                 <h3 style={{ fontSize: 22, fontWeight: 600, margin: "0 0 8px", letterSpacing: "-0.02em" }}>Ready to upload your own?</h3>
                 <p style={{ fontSize: 13.5, color: "var(--text-3)", margin: "0 0 18px" }}>3 documents free, no card. Credits never expire.</p>
                 <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-                  <a href="auth/signup.html" className="btn btn-iris">Sign up free →</a>
+                  <a href="/signup.html" className="btn btn-iris">Sign up free →</a>
                   <a href="pricing.html" className="btn btn-glass">See pricing</a>
                 </div>
               </div>

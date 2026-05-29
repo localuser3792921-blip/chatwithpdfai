@@ -24,9 +24,9 @@
     const { useState } = React;
     const RESULTS = {
       documents: [
-        { name: "MSA — Acme ↔ Helix Labs.pdf", folder: "Active Cases", snippet: "...the aggregate liability of either Party shall not exceed two (2) times the fees paid in the twelve (12) months preceding the claim, **except for claims arising from intellectual property infringement**...", page: 47, type: "Contract", href: "document.html" },
-        { name: "MSA Template — Firm Standard.pdf", folder: "Active Cases", snippet: "...standard **indemnification** cap of 1× annual fees, with no carve-outs except for gross negligence or willful misconduct...", page: 31, type: "Template", href: "document.html" },
-        { name: "Q3-earnings-NVDA-2026.pdf", folder: "Due Diligence", snippet: "...NVIDIA's **indemnification** obligations to customers under existing data center contracts are capped at 12 months of fees paid...", page: 64, type: "SEC filing", href: "document.html" },
+        { name: "MSA — Acme ↔ Helix Labs.pdf", folder: "Active Cases", snippet: "...the aggregate liability of either Party shall not exceed two (2) times the fees paid in the twelve (12) months preceding the claim, **except for claims arising from intellectual property infringement**...", page: 47, type: "Contract", href: "/library.html" },
+        { name: "MSA Template — Firm Standard.pdf", folder: "Active Cases", snippet: "...standard **indemnification** cap of 1× annual fees, with no carve-outs except for gross negligence or willful misconduct...", page: 31, type: "Template", href: "/library.html" },
+        { name: "Q3-earnings-NVDA-2026.pdf", folder: "Due Diligence", snippet: "...NVIDIA's **indemnification** obligations to customers under existing data center contracts are capped at 12 months of fees paid...", page: 64, type: "SEC filing", href: "/library.html" },
       ],
       chats: [
         { q: "What's the indemnification cap?", a: "The cap is **2× annual fees**, with three carve-outs.", doc: "MSA — Acme ↔ Helix Labs", when: "Today, 3:24 PM" },
@@ -107,7 +107,7 @@
                 {(filter === "all" || filter === "chats") && RESULTS.chats.length > 0 && (
                   <Group title="Chat history" sub="Past questions in your workspace">
                     {RESULTS.chats.map((r, i) => (
-                      <a key={i} href="app.html" className="glass hover-glow" style={{ padding: "16px 22px", borderRadius: "var(--r-lg)", display: "block" }}>
+                      <a key={i} href="/signup.html" className="glass hover-glow" style={{ padding: "16px 22px", borderRadius: "var(--r-lg)", display: "block" }}>
                         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 6 }}>
                           <div className="serif" style={{ fontSize: 14, fontStyle: "italic", color: "var(--text)" }}>"{r.q}"</div>
                           <div className="mono" style={{ fontSize: 10, color: "var(--text-3)", letterSpacing: "0.06em" }}>{r.when}</div>

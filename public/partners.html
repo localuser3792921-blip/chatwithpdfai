@@ -46,7 +46,7 @@
                 Up to 25% recurring commission for the lifetime of the customer. No floors, no caps, no exclusivity. Monthly payouts, transparent dashboard.
               </p>
               <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-                <a href="auth/signup.html" className="btn btn-iris btn-lg">Become a partner →</a>
+                <a href="/signup.html" className="btn btn-iris btn-lg">Become a partner →</a>
                 <a href="contact.html" className="btn btn-glass btn-lg">Talk to us</a>
               </div>
               <div style={{ marginTop: 36, display: "flex", justifyContent: "center", gap: 36, flexWrap: "wrap" }}>
@@ -82,7 +82,7 @@
                         </li>
                       ))}
                     </ul>
-                    <a href="auth/signup.html" className={t.featured ? "btn btn-iris" : "btn btn-glass"} style={{ width: "100%", justifyContent: "center" }}>Apply →</a>
+                    <a href="/signup.html" className={t.featured ? "btn btn-iris" : "btn btn-glass"} style={{ width: "100%", justifyContent: "center" }}>Apply →</a>
                   </div>
                 ))}
               </div>
@@ -110,7 +110,7 @@
                     <div className="eyebrow" style={{ marginBottom: 8 }}>Estimated annual commission</div>
                     <div className="iris" style={{ fontSize: 48, fontWeight: 600, lineHeight: 1, letterSpacing: "-0.03em", marginBottom: 14 }}>${annual.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
                     <div className="mono" style={{ fontSize: 10.5, color: "var(--text-3)", letterSpacing: "0.06em", marginBottom: 14 }}>≈ ${(annual / 12).toFixed(0)}/MO · PAID MONTHLY</div>
-                    <a href="auth/signup.html" className="btn btn-iris" style={{ width: "100%", marginTop: 8, justifyContent: "center" }}>Apply to be a partner →</a>
+                    <a href="/signup.html" className="btn btn-iris" style={{ width: "100%", marginTop: 8, justifyContent: "center" }}>Apply to be a partner →</a>
                   </div>
                 </div>
                 <style>{`@media (max-width: 760px) { .part-calc { grid-template-columns: 1fr !important; } .part-calc > div:last-child { border-left: none !important; padding-left: 0 !important; border-top: 1px solid var(--stroke-1); padding-top: 24px !important; } }`}</style>

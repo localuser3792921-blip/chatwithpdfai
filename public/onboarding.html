@@ -45,7 +45,7 @@
       const s = STEPS[i];
       const next = () => {
         if (i === STEPS.length - 1) {
-          window.location.href = "app.html";
+          window.location.href = "/signup.html";
         } else {
           setI(i + 1);
         }
@@ -54,7 +54,7 @@
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
           <header style={{ padding: "18px 28px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <a href="landing.html" className="brand"><span className="brand-mark">◇</span>chatwithpdfai<span className="domain">.com</span></a>
-            <a href="app.html" className="mono" style={{ fontSize: 11, color: "var(--text-3)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Skip tour →</a>
+            <a href="/signup.html" className="mono" style={{ fontSize: 11, color: "var(--text-3)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Skip tour →</a>
           </header>
 
           <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px 28px 40px" }}>

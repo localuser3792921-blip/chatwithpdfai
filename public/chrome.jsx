@@ -34,8 +34,8 @@ function Masthead({ active }) {
           ))}
         </nav>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <a href="auth/signin.html" className="btn btn-ghost btn-sm">Sign in</a>
-          <a href="auth/signup.html" className="btn btn-iris btn-sm">Try free →</a>
+          <a href="/signin.html" className="btn btn-ghost btn-sm">Sign in</a>
+          <a href="/signup.html" className="btn btn-iris btn-sm">Try free →</a>
         </div>
       </div>
     </header>

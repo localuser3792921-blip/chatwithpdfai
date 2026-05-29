@@ -16,7 +16,7 @@ function UseCasePage({ data }) {
               </h1>
               <p style={{ fontSize: 18, color: "var(--text-3)", lineHeight: 1.55, margin: "0 0 28px", maxWidth: 540 }}>{data.lede}</p>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-                <a href="auth/signup.html" className="btn btn-iris btn-lg">{data.cta}</a>
+                <a href="/signup.html" className="btn btn-iris btn-lg">{data.cta}</a>
                 <a href="landing.html#pricing" className="btn btn-glass btn-lg">See pricing</a>
               </div>
               <div style={{ display: "flex", gap: 28, marginTop: 36, flexWrap: "wrap" }}>
@@ -106,7 +106,7 @@ function UseCasePage({ data }) {
           <h2 className="display" style={{ fontSize: "clamp(36px, 5vw, 60px)", margin: "0 auto 18px", maxWidth: 760, lineHeight: 1.05 }}>{data.ctaTitle}</h2>
           <p style={{ fontSize: 16, color: "var(--text-3)", maxWidth: 520, margin: "0 auto 30px" }}>3 documents free, no card. {data.ctaSub}</p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-            <a href="auth/signup.html" className="btn btn-iris btn-lg">{data.cta}</a>
+            <a href="/signup.html" className="btn btn-iris btn-lg">{data.cta}</a>
             <a href="contact.html" className="btn btn-glass btn-lg">Talk to us</a>
           </div>
         </div>
