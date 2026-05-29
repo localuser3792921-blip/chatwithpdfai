@@ -4,9 +4,8 @@ import { useState, useEffect } from 'react';
 const NAV = [
   { label: 'Product', href: '/#how', k: 'product' },
   { label: 'Pricing', href: '/pricing', k: 'pricing' },
-  { label: 'Customers', href: '/customers/index.html', k: 'customers' },
-  { label: 'Docs', href: '/docs', k: 'docs' },
   { label: 'Blog', href: '/blog', k: 'blog' },
+  { label: 'Help', href: '/help/index.html', k: 'help' },
 ];
 
 export function Masthead({ active }) {
@@ -55,15 +54,14 @@ export function Footer({ minimal }) {
     );
   }
   const cols = [
-    { h: 'Product', l: [['Features', '/#features'], ['Pricing', '/pricing'], ['API', '/docs'], ['Changelog', '/changelog'], ['Roadmap', '/roadmap'], ['Status', '/status']] },
-    { h: 'Use cases', l: [['Students', '/use-cases/students.html'], ['Legal', '/use-cases/legal-pros.html'], ['Finance', '/use-cases/finance.html'], ['Research', '/use-cases/research.html'], ['Healthcare', '/use-cases/healthcare.html'], ['Customers', '/customers/index.html']] },
-    { h: 'Company', l: [['Blog', '/blog'], ['Manifesto', '/manifesto'], ['Press kit', '/press'], ['Careers', '/careers'], ['Contact', '/contact']] },
-    { h: 'Resources', l: [['Help center', '/help/index.html'], ['Privacy', '/legal/privacy.html'], ['Terms', '/legal/terms.html'], ['DPA', '/legal/dpa.html'], ['Sub-processors', '/legal/sub-processors.html'], ['Cookies', '/legal/cookies.html']] },
+    { h: 'Product', l: [['Features', '/#features'], ['Pricing', '/pricing']] },
+    { h: 'Company', l: [['Blog', '/blog'], ['Manifesto', '/manifesto.html'], ['Contact', '/contact']] },
+    { h: 'Resources', l: [['Help', '/help/index.html'], ['Privacy', '/legal/privacy'], ['Terms', '/legal/terms'], ['Security', '/legal/security'], ['DPA', '/legal/dpa'], ['Cookies', '/legal/cookies']] },
   ];
   return (
     <footer style={{ borderTop: '1px solid var(--stroke-1)', padding: '60px 0 30px', marginTop: 80 }}>
       <div className="spread">
-        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr', gap: 40 }} className="foot-grid">
+        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr', gap: 40 }} className="foot-grid">
           <div>
             <a href="/" className="brand" style={{ fontSize: 18 }}>
               <span className="brand-mark">◇</span>
