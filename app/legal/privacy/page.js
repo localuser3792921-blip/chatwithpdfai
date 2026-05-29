@@ -1,28 +1,5 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Privacy Policy — CHATWITHPDFAI</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../styles.css" />
-  <link rel="stylesheet" href="../a11y.css" />
-  <link rel="stylesheet" href="../prose.css" />
-  <link rel="stylesheet" href="../print.css" media="print" />
-  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
-</head>
-<body data-screen-label="Privacy Policy">
-  <a class="skip-link" href="#root">Skip to content</a>
-  <div class="aurora-bg"></div>
-  <div id="root"></div>
-  <script type="text/babel" src="../chrome.jsx"></script>
-  <script type="text/babel" src="../long-form.jsx"></script>
-  <script type="text/babel">
-    const SECTIONS = [
+import LongFormPage from '../../_components/LongForm';
+const SECTIONS = [
       { id: "intro", title: "1. Introduction", body: [
         "CHATWITHPDFAI, Inc. (\"we\", \"us\", \"our\") provides a service that lets you upload PDF documents and chat with them using AI. This Privacy Policy explains what data we collect, what we do with it, and the rights you have over it.",
         "This policy is written in plain English. The defined terms are bold; capitalized phrases like **Personal Data** mean the same thing they would in the GDPR.",
@@ -36,7 +13,7 @@
         { h3: "2.3 Usage data" },
         "We log standard server data: IP address, user agent, request timestamps, and feature usage (e.g. how many credits you have spent). We use this to debug, prevent abuse, and improve the product.",
         { h3: "2.4 Billing data" },
-        "We use **Stripe** as our payment processor. Stripe collects your card number directly — we never see or store it. We receive only the last 4 digits, card brand, and a token we use to charge you.",
+        "We use **Razorpay** as our payment processor. Razorpay collects your card number directly — we never see or store it. We receive only the last 4 digits, card brand, and a token we use to charge you.",
       ]},
       { id: "use", title: "3. How we use your data", body: [
         "We use your data to:",
@@ -58,7 +35,7 @@
           rows: [
             ["Hosting", "AWS (us-east-1, eu-west-1)", "Compute & encrypted storage"],
             ["AI inference", "OpenAI, Anthropic", "Generating answers from documents"],
-            ["Payments", "Stripe", "Processing card payments"],
+            ["Payments", "Razorpay", "Processing card payments"],
             ["Email", "Postmark", "Transactional email delivery"],
             ["Analytics", "PostHog (self-hosted)", "Product analytics, anonymized"],
             ["Error tracking", "Sentry", "Crash & error monitoring"],
@@ -102,17 +79,7 @@
         "Email: `privacy@chatwithpdfai.com` (privacy requests), `dpo@chatwithpdfai.com` (DPO / GDPR), `support@chatwithpdfai.com` (general).",
       ]},
     ];
-    function App() {
-      return <LongFormPage
-        eyebrow="Legal · Privacy"
-        title="Privacy Policy"
-        lede="We collect what we need to run the service. We do not sell your data. We do not train AI models on your files."
-        lastUpdated="May 22, 2026"
-        downloadHref="#"
-        sections={SECTIONS}
-      />;
-    }
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-  </script>
-</body>
-</html>
+export const metadata = { title: "Privacy Policy \u2014 CHATWITHPDFAI" };
+export default function Page() {
+  return <LongFormPage eyebrow={"Legal \u00b7 Privacy"} title={"Privacy Policy"} lede={"We collect what we need to run the service. We do not sell your data. We do not train AI models on your files."} lastUpdated={"May 22, 2026"} sections={SECTIONS} />;
+}

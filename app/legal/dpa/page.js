@@ -1,28 +1,5 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Data Processing Agreement — CHATWITHPDFAI</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../styles.css" />
-  <link rel="stylesheet" href="../a11y.css" />
-  <link rel="stylesheet" href="../prose.css" />
-  <link rel="stylesheet" href="../print.css" media="print" />
-  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
-</head>
-<body data-screen-label="Data Processing Agreement">
-  <a class="skip-link" href="#root">Skip to content</a>
-  <div class="aurora-bg"></div>
-  <div id="root"></div>
-  <script type="text/babel" src="../chrome.jsx"></script>
-  <script type="text/babel" src="../long-form.jsx"></script>
-  <script type="text/babel">
-    const SECTIONS = [
+import LongFormPage from '../../_components/LongForm';
+const SECTIONS = [
       { id: "scope", title: "1. Scope & roles", body: [
         "This Data Processing Agreement (DPA) supplements the Terms of Service between CHATWITHPDFAI, Inc. (\"Processor\") and you (\"Controller\"). It applies whenever we process Personal Data on your behalf in connection with the Service.",
         "For the purposes of the GDPR and equivalent laws: **you are the Controller**, **we are the Processor**.",
@@ -88,18 +65,7 @@
         "If you need a counter-signed copy, email `dpo@chatwithpdfai.com` from your billing email. We will return a signed PDF within 2 business days. Enterprise customers can request our pre-signed DPA from sales.",
       ]},
     ];
-    function App() {
-      return <LongFormPage
-        eyebrow="Legal · DPA"
-        title="Data Processing Agreement"
-        lede="GDPR Article 28 DPA with standard contractual clauses. Sign-ready for Enterprise customers."
-        lastUpdated="May 22, 2026"
-        downloadHref="#"
-        downloadLabel="Download signed DPA"
-        sections={SECTIONS}
-      />;
-    }
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-  </script>
-</body>
-</html>
+export const metadata = { title: "Data Processing Agreement \u2014 CHATWITHPDFAI" };
+export default function Page() {
+  return <LongFormPage eyebrow={"Legal \u00b7 DPA"} title={"Data Processing Agreement"} lede={"GDPR Article 28 DPA with standard contractual clauses. Sign-ready for Enterprise customers."} lastUpdated={"May 22, 2026"} sections={SECTIONS} />;
+}

@@ -1,28 +1,5 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Security — CHATWITHPDFAI</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../styles.css" />
-  <link rel="stylesheet" href="../a11y.css" />
-  <link rel="stylesheet" href="../prose.css" />
-  <link rel="stylesheet" href="../print.css" media="print" />
-  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
-</head>
-<body data-screen-label="Security policy">
-  <a class="skip-link" href="#root">Skip to content</a>
-  <div class="aurora-bg"></div>
-  <div id="root"></div>
-  <script type="text/babel" src="../chrome.jsx"></script>
-  <script type="text/babel" src="../long-form.jsx"></script>
-  <script type="text/babel">
-    const SECTIONS = [
+import LongFormPage from '../../_components/LongForm';
+const SECTIONS = [
       { id: "overview", title: "Overview", body: [
         "Documents you upload to CHATWITHPDFAI are often privileged — contracts, clinical records, financial filings, M&A diligence. We treat them that way.",
         "This page is the detailed companion to the security claims on our landing page. If you need attestations or are running enterprise diligence, email `security@chatwithpdfai.com` and we'll share our SOC 2 Type II report and pentest summary under NDA.",
@@ -75,16 +52,7 @@
         "PGP key (Fingerprint: `B3D4 1F9E 0A12 …`): fetch from `chatwithpdfai.com/pgp.asc`.",
       ]},
     ];
-    function App() {
-      return <LongFormPage
-        eyebrow="Legal · Security"
-        title="Security policy"
-        lede="The bar is the bar. Lawyers, doctors, and analysts brought us here."
-        lastUpdated="May 22, 2026"
-        sections={SECTIONS}
-      />;
-    }
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-  </script>
-</body>
-</html>
+export const metadata = { title: "Security policy \u2014 CHATWITHPDFAI" };
+export default function Page() {
+  return <LongFormPage eyebrow={"Legal \u00b7 Security"} title={"Security policy"} lede={"The bar is the bar. Lawyers, doctors, and analysts brought us here."} lastUpdated={"May 22, 2026"} sections={SECTIONS} />;
+}

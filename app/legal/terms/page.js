@@ -1,28 +1,5 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Terms of Service — CHATWITHPDFAI</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../styles.css" />
-  <link rel="stylesheet" href="../a11y.css" />
-  <link rel="stylesheet" href="../prose.css" />
-  <link rel="stylesheet" href="../print.css" media="print" />
-  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
-</head>
-<body data-screen-label="Terms of Service">
-  <a class="skip-link" href="#root">Skip to content</a>
-  <div class="aurora-bg"></div>
-  <div id="root"></div>
-  <script type="text/babel" src="../chrome.jsx"></script>
-  <script type="text/babel" src="../long-form.jsx"></script>
-  <script type="text/babel">
-    const SECTIONS = [
+import LongFormPage from '../../_components/LongForm';
+const SECTIONS = [
       { id: "agreement", title: "1. Agreement to terms", body: [
         "These Terms of Service (\"Terms\") govern your use of the CHATWITHPDFAI service (\"Service\"). By creating an account or using the Service, you agree to be bound by these Terms.",
         "If you are using the Service on behalf of an organization, you represent that you have authority to bind that organization, and \"you\" refers to that organization.",
@@ -35,7 +12,7 @@
         { h3: "3.1 What credits buy" },
         "One credit lets you upload and chat with one document, however many questions you ask. Credits are consumed on upload, not on each question. Credits never expire.",
         { h3: "3.2 Payment" },
-        "You buy credits in packs (Reader, Practice, Chamber) at the prices shown on our pricing page. Payment is processed by Stripe. All purchases are in US dollars.",
+        "You buy credits in packs (Reader, Practice, Chamber) at the prices shown on our pricing page. Payment is processed by Razorpay. All purchases are in US dollars.",
         { h3: "3.3 Refunds" },
         "We refund unused credits within 30 days of purchase, no questions asked. Email `support@chatwithpdfai.com`.",
         { h3: "3.4 Price changes" },
@@ -85,17 +62,7 @@
         "**CHATWITHPDFAI, Inc.**, 548 Market St #84219, San Francisco, CA 94104, USA · `legal@chatwithpdfai.com`",
       ]},
     ];
-    function App() {
-      return <LongFormPage
-        eyebrow="Legal · Terms"
-        title="Terms of Service"
-        lede="Plain-English terms. Pay per document. We don't train on your files. You own your content."
-        lastUpdated="May 22, 2026"
-        downloadHref="#"
-        sections={SECTIONS}
-      />;
-    }
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-  </script>
-</body>
-</html>
+export const metadata = { title: "Terms of Service \u2014 CHATWITHPDFAI" };
+export default function Page() {
+  return <LongFormPage eyebrow={"Legal \u00b7 Terms"} title={"Terms of Service"} lede={"Plain-English terms. Pay per document. We don't train on your files. You own your content."} lastUpdated={"May 22, 2026"} sections={SECTIONS} />;
+}

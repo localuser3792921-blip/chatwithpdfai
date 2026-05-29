@@ -1,28 +1,5 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sub-processors — CHATWITHPDFAI</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../styles.css" />
-  <link rel="stylesheet" href="../a11y.css" />
-  <link rel="stylesheet" href="../prose.css" />
-  <link rel="stylesheet" href="../print.css" media="print" />
-  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
-</head>
-<body data-screen-label="Sub-processors">
-  <a class="skip-link" href="#root">Skip to content</a>
-  <div class="aurora-bg"></div>
-  <div id="root"></div>
-  <script type="text/babel" src="../chrome.jsx"></script>
-  <script type="text/babel" src="../long-form.jsx"></script>
-  <script type="text/babel">
-    const SECTIONS = [
+import LongFormPage from '../../_components/LongForm';
+const SECTIONS = [
       { id: "intro", title: "Current sub-processors", body: [
         "These are the third parties we engage to provide the Service. Each has a written agreement with us containing GDPR-compliant data protection terms. We notify customers at least 30 days before adding a new sub-processor.",
         "Subscribe to changes at `subprocessors@chatwithpdfai.com`.",
@@ -32,7 +9,7 @@
             ["Amazon Web Services (AWS)", "Cloud hosting, compute, storage", "All Customer Data", "us-east-1 (default), eu-west-1 (EU residency)", "SOC 2 Type II, ISO 27001, HIPAA"],
             ["OpenAI", "AI inference (GPT-class models)", "Document text, chat queries — not retained, not used to train", "US", "SOC 2 Type II"],
             ["Anthropic", "AI inference (Claude models)", "Document text, chat queries — not retained, not used to train", "US", "SOC 2 Type II"],
-            ["Stripe, Inc.", "Payment processing", "Billing email, card token, transaction history", "US, EU", "PCI DSS Level 1, SOC 2"],
+            ["Razorpay, Inc.", "Payment processing", "Billing email, card token, transaction history", "US, EU", "PCI DSS Level 1, SOC 2"],
             ["Postmark (ActiveCampaign)", "Transactional email delivery", "Email address, message content", "US", "SOC 2"],
             ["Sentry", "Application error tracking", "Stack traces, request metadata (scrubbed)", "US, EU", "SOC 2 Type II"],
             ["PostHog (self-hosted)", "Product analytics", "Anonymized events, no PII, no document content", "Our AWS infrastructure", "Self-hosted under our SOC 2"],
@@ -49,16 +26,7 @@
         "Email `subprocessors@chatwithpdfai.com` to subscribe to change notifications. If you object to a new sub-processor for legitimate data-protection reasons, you may terminate the agreement and receive a pro-rata refund of unused credits.",
       ]},
     ];
-    function App() {
-      return <LongFormPage
-        eyebrow="Legal · Sub-processors"
-        title="Sub-processor list"
-        lede="Every vendor that touches your data, named. Updated within 7 days of any change."
-        lastUpdated="May 22, 2026"
-        sections={SECTIONS}
-      />;
-    }
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-  </script>
-</body>
-</html>
+export const metadata = { title: "Sub-processor list \u2014 CHATWITHPDFAI" };
+export default function Page() {
+  return <LongFormPage eyebrow={"Legal \u00b7 Sub-processors"} title={"Sub-processor list"} lede={"Every vendor that touches your data, named. Updated within 7 days of any change."} lastUpdated={"May 22, 2026"} sections={SECTIONS} />;
+}

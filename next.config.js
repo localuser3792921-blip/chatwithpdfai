@@ -48,6 +48,12 @@ const nextConfig = {
       { source: '/buy.html', destination: '/buy', permanent: true },
       { source: '/landing.html', destination: '/', permanent: true },
       { source: '/pricing.html', destination: '/pricing', permanent: true },
+      { source: '/legal/cookies.html', destination: '/legal/cookies', permanent: true },
+      { source: '/legal/dpa.html', destination: '/legal/dpa', permanent: true },
+      { source: '/legal/privacy.html', destination: '/legal/privacy', permanent: true },
+      { source: '/legal/security.html', destination: '/legal/security', permanent: true },
+      { source: '/legal/sub-processors.html', destination: '/legal/sub-processors', permanent: true },
+      { source: '/legal/terms.html', destination: '/legal/terms', permanent: true },
     ];
   },
 
