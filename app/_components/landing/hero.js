@@ -1,3 +1,5 @@
+'use client';
+import React from 'react';
 // CHATWITHPDFAI.COM — Aurora Landing · Header + Hero
 const { useState, useEffect, useRef, useCallback } = React;
 
@@ -26,8 +28,8 @@ function Masthead() {
           <a href="#security">Security</a>
         </nav>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <a href="/signup.html" className="btn btn-ghost btn-sm">Sign in</a>
-          <a href="/signup.html" className="btn btn-iris btn-sm">Try free →</a>
+          <a href="/signup" className="btn btn-ghost btn-sm">Sign in</a>
+          <a href="/signup" className="btn btn-iris btn-sm">Try free →</a>
         </div>
       </div>
     </header>
@@ -58,7 +60,7 @@ function Hero() {
     e.preventDefault();
     setDrag(false);
     setFiled(true);
-    setTimeout(() => { window.location.href = "/signup.html"; }, 850);
+    setTimeout(() => { window.location.href = "/signup"; }, 850);
   };
 
   return (
@@ -132,7 +134,7 @@ function Hero() {
             </div>
 
             <div style={{ marginTop: 22, display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
-              <a href="/signup.html" className="btn btn-iris btn-lg">Try free — 3 PDFs, no card →</a>
+              <a href="/signup" className="btn btn-iris btn-lg">Try free — 3 PDFs, no card →</a>
               <a href="#pricing" className="btn btn-glass btn-lg">See credit pricing</a>
             </div>
 
@@ -295,4 +297,4 @@ function RichText({ text }) {
   );
 }
 
-Object.assign(window, { Masthead, Hero, RichText });
+export { Masthead, Hero, RichText };

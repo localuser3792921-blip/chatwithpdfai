@@ -1,3 +1,5 @@
+'use client';
+import React from 'react';
 // CHATWITHPDFAI.COM — Aurora · Pricing · Security · FAQ · Footer
 
 const { useState: uS4 } = React;
@@ -85,7 +87,7 @@ function Pricing() {
             </p>
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            <a href="/signup.html" className="btn btn-iris">Start free →</a>
+            <a href="/signup" className="btn btn-iris">Start free →</a>
             <a href="#" className="btn btn-glass">Talk to sales</a>
           </div>
         </div>
@@ -219,7 +221,7 @@ function Footer() {
             3 documents free, no card required. Then $5 for 50 more. Credits never expire.
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-            <a href="/signup.html" className="btn btn-iris btn-lg">Try free →</a>
+            <a href="/signup" className="btn btn-iris btn-lg">Try free →</a>
             <a href="#pricing" className="btn btn-glass btn-lg">Buy a credit pack</a>
           </div>
         </div>
@@ -277,4 +279,4 @@ function Footer() {
   );
 }
 
-Object.assign(window, { Pricing, Security, FAQ, Footer });
+export { Pricing, Security, FAQ, Footer };

@@ -1,3 +1,5 @@
+'use client';
+import React from 'react';
 // CHATWITHPDFAI.COM — Aurora · Use Cases · Compare · Testimonials
 
 const { useState: uS3 } = React;
@@ -308,4 +310,4 @@ function Testimonials() {
   );
 }
 
-Object.assign(window, { UseCases, CompareTable, Testimonials });
+export { UseCases, CompareTable, Testimonials };

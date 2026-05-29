@@ -1,3 +1,5 @@
+'use client';
+import React from 'react';
 // CHATWITHPDFAI.COM — Aurora · How it works · Live preview · Features
 
 const { useState: uS2, useEffect: uE2 } = React;
@@ -263,4 +265,4 @@ function FeaturesGrid() {
   );
 }
 
-Object.assign(window, { HowItWorks, LivePreview, FeaturesGrid });
+export { HowItWorks, LivePreview, FeaturesGrid };
