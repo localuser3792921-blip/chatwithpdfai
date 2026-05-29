@@ -272,6 +272,9 @@ Stuff that matters after launch.
 | 2026-05-29 | Razorpay purchase flow (order/checkout/webhook/receipt) = M6b, awaiting Razorpay test keys | Ledger + `purchases` table ready; just needs the gateway wired |
 | 2026-05-29 | Traced mysql2 for /api/chat, /api/chat/estimate, /api/credits in next.config | Were missing -> Hostinger would prune mysql2 and break them once the flag is on |
 | 2026-05-29 | M5b shipped: email verification (signup -> /api/auth/verify) + password reset (/api/auth/forgot -> /api/auth/reset) | Single-use, time-boxed tokens; SMTP send best-effort; forgot.html/reset.html UI. Verified end to end on live DB. |
+| 2026-05-29 | M6b shipped: Razorpay payment — order (Orders API) -> Checkout.js -> client signature verify -> webhook (HMAC), idempotent credit top-up; `buy.html` | Tested against Razorpay TEST mode with real signatures (order created, verify +credits, webhook +credits, idempotent, bad-sig rejected). Completes M6. |
+| 2026-05-29 | Razorpay keys are per-account (one MID = one test key), shared across pdfcraftai.com + chatwithpdfai.com | Per Razorpay docs; webhook secret is per-webhook though |
+| 2026-05-29 | Prod needs RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET / RAZORPAY_WEBHOOK_SECRET in hPanel env before payments work live | Same pattern as the other secrets (hPanel, not committed) |
 
 ---
 
