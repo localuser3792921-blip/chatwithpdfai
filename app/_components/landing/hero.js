@@ -123,7 +123,7 @@ function Hero() {
                   {filed ? "✓ Filed — opening workspace…" : prompts[step]}
                 </div>
                 <div className="mono" style={{ fontSize: 10.5, color: "var(--text-4)", letterSpacing: "0.1em", marginTop: 3, textTransform: "uppercase" }}>
-                  Drop a PDF or click · Up to 2,000 pages · OCR included
+                  Drop a PDF or click · Up to 500 pages · 50 MB max
                 </div>
               </div>
               <kbd className="mono" style={{
@@ -134,7 +134,7 @@ function Hero() {
             </div>
 
             <div style={{ marginTop: 22, display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
-              <a href="/signup" className="btn btn-iris btn-lg">Try free — 3 PDFs, no card →</a>
+              <a href="/signup" className="btn btn-iris btn-lg">Get started — drop a PDF →</a>
               <a href="#pricing" className="btn btn-glass btn-lg">See credit pricing</a>
             </div>
 

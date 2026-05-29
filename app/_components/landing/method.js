@@ -11,7 +11,7 @@ function HowItWorks() {
   const steps = [
     {
       n: "01", t: "Upload", glyph: "↑",
-      d: "Drop in a PDF or a whole folder. Scanned, encrypted, or 2,000 pages long — we handle it. OCR runs automatically.",
+      d: "Drop in a PDF or a whole folder. Scanned, encrypted, or 500 pages long — we handle it. Text extraction runs automatically.",
     },
     {
       n: "02", t: "Ask", glyph: "?",
@@ -215,7 +215,7 @@ function FeaturesGrid() {
     { t: "Citations to the paragraph", d: "Every answer footnoted to a page and paragraph. Click to scroll the PDF.", g: "¹" },
     { t: "Side-by-side reader", d: "PDF viewer pinned next to the chat. Highlights sync both ways.", g: "▥" },
     { t: "Multi-PDF chat", d: "Ask across a folder. We tell you which document said what.", g: "≡" },
-    { t: "OCR for scans", d: "Scanned filings, faxes, photos of pages — all readable.", g: "⌖" },
+    { t: "Cited answers", d: "Scanned filings, faxes, photos of pages — all readable.", g: "⌖" },
     { t: "Auto-summaries", d: "Executive, technical, or one-paragraph — on upload.", g: "§" },
     { t: "Flashcards & quizzes", d: "Turn any document into a study set. Export to Anki.", g: "♢" },
     { t: "70+ languages", d: "Read in one language, ask in another. Footnoted translations.", g: "ℒ" },
