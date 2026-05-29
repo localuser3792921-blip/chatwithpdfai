@@ -59,10 +59,12 @@ function renderBlock(b, key) {
   if (b.ul) return <ul key={key}>{b.ul.map((li, i) => <li key={i}>{renderInline(li)}</li>)}</ul>;
   if (b.ol) return <ol key={key}>{b.ol.map((li, i) => <li key={i}>{renderInline(li)}</li>)}</ol>;
   if (b.table) return (
-    <table key={key}>
+    <div key={key} style={{ overflowX: "auto", margin: "16px 0 24px", WebkitOverflowScrolling: "touch" }}>
+    <table style={{ marginTop: 0, marginBottom: 0 }}>
       <thead><tr>{b.table.headers.map(h => <th key={h}>{h}</th>)}</tr></thead>
       <tbody>{b.table.rows.map((r, ri) => <tr key={ri}>{r.map((c, ci) => <td key={ci}>{renderInline(c)}</td>)}</tr>)}</tbody>
     </table>
+    </div>
   );
   if (b.quote) return <blockquote key={key}>{renderInline(b.quote)}</blockquote>;
   if (b.code) return <pre key={key} style={{ background: "var(--glass-2)", border: "1px solid var(--stroke-2)", borderRadius: "var(--r)", padding: 16, fontSize: 12.5, fontFamily: "var(--mono)", color: "var(--violet-2)", overflowX: "auto" }}>{b.code}</pre>;

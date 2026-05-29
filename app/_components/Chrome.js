@@ -43,10 +43,9 @@ export function Footer({ minimal }) {
         <div className="spread" style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14, fontSize: 11, color: 'var(--text-4)' }}>
           <span className="mono" style={{ letterSpacing: '0.08em' }}>© {year} CHATWITHPDFAI</span>
           <div style={{ display: 'flex', gap: 18 }}>
-            <a href="/legal/privacy.html" style={{ color: 'var(--text-3)' }}>Privacy</a>
-            <a href="/legal/terms.html" style={{ color: 'var(--text-3)' }}>Terms</a>
-            <a href="/legal/security.html" style={{ color: 'var(--text-3)' }}>Security</a>
-            <a href="/status" style={{ color: 'var(--text-3)' }}>Status</a>
+            <a href="/legal/privacy" style={{ color: 'var(--text-3)' }}>Privacy</a>
+            <a href="/legal/terms" style={{ color: 'var(--text-3)' }}>Terms</a>
+            <a href="/legal/security" style={{ color: 'var(--text-3)' }}>Security</a>
           </div>
         </div>
       </footer>
@@ -125,7 +124,7 @@ export function CookieBanner() {
 
 export function PageHeader({ eyebrow, title, lede, align = 'left' }) {
   return (
-    <section style={{ padding: '60px 0 36px', position: 'relative' }}>
+    <section style={{ padding: '60px 0 36px', position: 'relative', overflow: 'hidden' }}>
       <div className="section-blob" style={{ background: 'radial-gradient(circle, var(--violet), transparent 60%)', top: -100, right: -100, opacity: 0.3 }}></div>
       <div className="spread" style={{ textAlign: align }}>
         <div className="section-eyebrow" style={{ justifyContent: align === 'center' ? 'center' : 'flex-start' }}>{eyebrow}</div>
@@ -140,7 +139,7 @@ export default function SiteShell({ children, active, minimalFooter }) {
   return (
     <>
       <Masthead active={active} />
-      <main id="main" style={{ minHeight: '60vh' }}>{children}</main>
+      <main id="main" style={{ minHeight: '60vh', overflowX: 'clip' }}>{children}</main>
       <Footer minimal={minimalFooter} />
       <CookieBanner />
     </>

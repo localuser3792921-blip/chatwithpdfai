@@ -7,7 +7,7 @@ function ArticlePage({ meta, sections, related, type = "post" }) {
   return (
     <SiteShell active={type === "post" ? "blog" : "help"}>
       {/* Hero */}
-      <section style={{ padding: "60px 0 30px", position: "relative" }}>
+      <section style={{ padding: "60px 0 30px", position: "relative", overflow: "hidden" }}>
         <div className="section-blob" style={{ background: "radial-gradient(circle, var(--violet), transparent 60%)", top: -50, right: -100, opacity: 0.3 }}></div>
         <div className="spread" style={{ position: "relative", zIndex: 2, maxWidth: 800 }}>
           <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 20 }}>

@@ -471,5 +471,10 @@ button { font-family: inherit; }
 }
 @media (max-width: 720px) {
   .masthead-inner { padding: 0 24px; }
+  .spread { padding: 0 24px; }
   .section-title { font-size: clamp(30px, 7vw, 44px); }
+}
+@media (max-width: 480px) {
+  .masthead-inner { padding: 0 16px; gap: 12px; }
+  .spread { padding: 0 18px; }
 }
