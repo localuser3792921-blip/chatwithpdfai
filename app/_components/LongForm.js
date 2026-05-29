@@ -14,7 +14,7 @@ function LongFormPage({ eyebrow, title, lede, lastUpdated, sections, downloadLab
     <SiteShell active="">
       <PageHeader eyebrow={eyebrow} title={title} lede={lede} />
       <section style={{ padding: "0 0 100px" }}>
-        <div className="spread" style={{ display: "grid", gridTemplateColumns: "1fr 220px", gap: 60, alignItems: "start" }} className="lf-grid">
+        <div className="spread lf-grid" style={{ display: "grid", gridTemplateColumns: "1fr 220px", gap: 60, alignItems: "start" }}>
           <div className="prose">
             {lastUpdated && (
               <div className="glass" style={{ padding: "12px 16px", borderRadius: "var(--r)", marginBottom: 32, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
