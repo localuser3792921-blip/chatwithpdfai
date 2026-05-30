@@ -104,7 +104,7 @@ async function verifyPass(sections) {
   if (!items.length) return { credits: 0, fixes: 0 };
   const sys = `You are a meticulous exam answer-checker. For EACH numbered item, FIRST work out the correct answer yourself, independently of the marked answer: for code-output items mentally execute the code step by step; for numeric items compute step by step; for factual items recall the verified fact. THEN compare with the "Marked" answer and also check the marked answer is internally consistent. Override the marked answer ONLY if your independently-derived answer clearly differs. For option items give the correct option index (integer); for true/false give true or false; for fill/numeric give the correct value. Output ONLY JSON: {"fixes":[{"i":<index>,"correct":<index|true|false|"text">}]}. Include only the items you are correcting; if all are right, return {"fixes":[]}.`;
   let result;
-  try { result = await routeChat({ system: sys, messages: [{ role: 'user', content: items.map((x) => x.line).join('\n\n') }], maxTokens: 1200, temperature: 0.1, jsonMode: true }); }
+  try { result = await routeChat({ system: sys, messages: [{ role: 'user', content: items.map((x) => x.line).join('\n\n') }], maxTokens: 1200, temperature: 0.1, jsonMode: true, prefer: 'google' }); }
   catch { return { credits: 0, fixes: 0 }; }
   let parsed; try { parsed = extractJson(result.text); } catch { return { credits: result.credits || 0, fixes: 0 }; }
   const fixes = Array.isArray(parsed.fixes) ? parsed.fixes : [];
