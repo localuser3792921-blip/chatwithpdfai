@@ -272,7 +272,7 @@ export default function StudioPage() {
 
   return (
     <SiteShell active="studio">
-      <PageHeader eyebrow="Studio · beta" title="Question paper generator" lede="Any subject, any structure. Build sections, generate a paper with an answer key, take it interactively to check your answers, or print and save as PDF." />
+      <div className="no-print"><PageHeader eyebrow="Studio · beta" title="Question paper generator" lede="Any subject, any structure. Build sections, generate a paper with an answer key, take it interactively to check your answers, or print and save as PDF." /></div>
       <section className="spread" style={{ paddingBottom: 70 }}>
         <div className="glass glass-iris-border no-print" style={{ padding: '20px 22px', borderRadius: 'var(--r-xl)' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12 }}>{CATEGORIES.map((c) => <button key={c.k} type="button" onClick={() => setCat(c.k)} className="chip" style={{ cursor: 'pointer', fontSize: 12.5, background: cat === c.k ? 'var(--glass-2)' : 'transparent', color: cat === c.k ? 'var(--text)' : 'var(--text-3)', borderColor: cat === c.k ? 'var(--violet)' : 'var(--stroke-2)' }}>{c.label}</button>)}</div>
@@ -397,7 +397,7 @@ export default function StudioPage() {
           </div>
         )}
       </section>
-      <style dangerouslySetInnerHTML={{ __html: `@media print { body * { visibility: hidden !important; position: static !important; transform: none !important; filter: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; contain: none !important; will-change: auto !important; perspective: none !important; } #paper-print, #paper-print * { visibility: visible !important; } #paper-print { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; border: none !important; border-radius: 0 !important; } .q-block, .key-item { break-inside: avoid !important; page-break-inside: avoid !important; } .section-head { break-after: avoid !important; page-break-after: avoid !important; } .pagebreak { page-break-before: always !important; break-before: page !important; } }` }} />
+      <style dangerouslySetInnerHTML={{ __html: `@media print { .no-print { display: none !important; } .masthead, footer { display: none !important; } html, body, main { padding-top: 0 !important; margin-top: 0 !important; background: #fff !important; } #paper-print { border: none !important; border-radius: 0 !important; box-shadow: none !important; max-width: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; } #paper-print .q-block, #paper-print .key-item { break-inside: avoid !important; page-break-inside: avoid !important; } #paper-print .section-head { break-after: avoid !important; page-break-after: avoid !important; } #paper-print .pagebreak { page-break-before: always !important; break-before: page !important; } }` }} />
     </SiteShell>
   );
 }
