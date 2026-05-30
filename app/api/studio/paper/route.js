@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { routeChat } from '@/lib/llm/router';
 import { getCurrentUser } from '@/lib/auth';
 import { getBalance, chargeCredits, creditsEnforced } from '@/lib/credits';
+import { getReadyDocuments, retrievePagesMulti } from '@/lib/store/chat';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -22,7 +23,7 @@ const TYPE_SCHEMA = {
 const ALL_TYPES = Object.keys(TYPE_SCHEMA);
 const DIFF = { easy: 'easy (recall)', medium: 'medium (application)', hard: 'hard (analysis)', mixed: 'a balanced mix of easy, medium and hard' };
 
-function buildSystem({ sections, difficulty, level, language, examStyle }) {
+function buildSystem({ sections, difficulty, level, language, examStyle, grounded }) {
   const used = [...new Set(sections.flatMap((s) => s.types))];
   const schemas = used.map((t) => '- ' + TYPE_SCHEMA[t]).join('\n');
   const blueprint = sections.map((s, i) => `  Section ${i + 1} "${s.title || ('Section ' + (i + 1))}": ${s.count} questions using type(s) ${s.types.join(', ')}.`).join('\n');
@@ -40,7 +41,7 @@ Hard rules:
 - Every fact, date, name and code behaviour must be accurate. Never invent. If unsure, choose content you are certain about.
 - For mcq/code/assertion, exactly one correct option; distractors must be plausible (common misconceptions).
 - Vary sub-topics; no duplicate or near-duplicate questions across the whole paper.
-- Each question object MUST include a "type" field and follow that type's exact shape.
+- Each question object MUST include a "type" field and follow that type's exact shape.${grounded ? '\n- Base EVERY question STRICTLY on the SOURCE MATERIAL in the user message. Do NOT use outside knowledge. Add a numeric "page" field to each question citing the source page it came from.' : ''}
 - Output ONLY valid minified JSON, no markdown, no commentary:
 {"title":"<short paper title>","sections":[{"title":"<section title>","questions":[ <question objects> ]}, ...]}`;
 }
@@ -58,6 +59,7 @@ function sanitize(q) {
   if (!q || typeof q !== 'object') return null;
   const type = ALL_TYPES.includes(q.type) ? q.type : 'mcq';
   const base = { type, q: str(q.q, 1400), explanation: str(q.explanation, 500) };
+  const pg = Number(q.page); if (Number.isInteger(pg) && pg > 0 && pg < 100000) base.page = pg;
   if (type === 'mcq' || type === 'code') { const options = Array.isArray(q.options) ? q.options.slice(0, 6).map((o) => str(o, 400)) : []; if (options.length < 2) return null; return { ...base, options, answer: clampIdx(q.answer, options.length) }; }
   if (type === 'multi') { const options = Array.isArray(q.options) ? q.options.slice(0, 6).map((o) => str(o, 400)) : []; if (options.length < 2) return null; let answers = Array.isArray(q.answers) ? q.answers.map(Number).filter((n) => n >= 0 && n < options.length) : []; if (!answers.length) answers = [0]; return { ...base, options, answers: [...new Set(answers)] }; }
   if (type === 'tf') return { ...base, answer: q.answer === true || String(q.answer).toLowerCase() === 'true' };
@@ -119,7 +121,8 @@ export async function POST(req) {
   const nonce = str(body.nonce, 40);
   const exclude = Array.isArray(body.exclude) ? body.exclude.slice(0, 80).map((s) => str(s, 140)).filter(Boolean) : [];
   const verify = body.verify !== false;
-  if (topic.length < 3) return NextResponse.json({ error: 'Please describe the topic or syllabus.' }, { status: 400 });
+  const documentId = Number(body.documentId) || 0;
+  if (topic.length < 3 && !documentId) return NextResponse.json({ error: 'Please describe the topic, or pick a source document.' }, { status: 400 });
 
   const u = await getCurrentUser(req);
   if (!u) return NextResponse.json({ error: 'Please sign in to continue' }, { status: 401 });
@@ -127,12 +130,26 @@ export async function POST(req) {
   const userId = u.id;
   if (creditsEnforced()) { const bal = await getBalance(userId); if (bal < 1) return NextResponse.json({ error: 'Insufficient credits — buy a pack to continue.' }, { status: 402 }); }
 
+  let sourceContext = '', grounded = false, sourceName = '';
+  if (documentId) {
+    const docs = await getReadyDocuments([documentId], userId);
+    const doc = docs[0];
+    if (!doc) return NextResponse.json({ error: 'Source document not found' }, { status: 404 });
+    if (doc.status !== 'ready') return NextResponse.json({ error: 'That document is still processing' }, { status: 409 });
+    sourceName = doc.original_filename || '';
+    let pages = [];
+    try { pages = await retrievePagesMulti({ documentIds: [documentId], query: topic || 'key concepts, definitions, facts and important points', topK: 14 }); } catch (e) { pages = []; }
+    if (!pages.length) return NextResponse.json({ error: 'No readable content found in that document' }, { status: 409 });
+    sourceContext = pages.map((p) => `[p.${p.page_number}] ${String(p.text).slice(0, 1000)}`).join('\n\n');
+    grounded = true;
+  }
   const totalQ = sections.reduce((n, s) => n + s.count, 0);
   try {
     const excludeNote = exclude.length ? `\n\nThese questions were already used — do NOT repeat or paraphrase any of them. Generate entirely new questions on fresh sub-topics:\n- ${exclude.join('\n- ')}` : '';
     const seedNote = nonce ? `\nVariation seed: ${nonce}. Use it to pick different sub-topics, examples and phrasing than a typical paper.` : '';
-    const userMsg = `Topic / syllabus: ${topic}\nProduce the paper exactly per the section blueprint above.${seedNote}${excludeNote}`;
-    const result = await routeChat({ system: buildSystem({ sections, difficulty, level, language, examStyle }), messages: [{ role: 'user', content: userMsg }], maxTokens: Math.min(7000, 320 * totalQ + 800), temperature: 0.8 });
+    const sourceNote = grounded ? `\n\nSOURCE MATERIAL — base every question on this and cite the page numbers shown:\n${sourceContext}` : '';
+    const userMsg = `Topic / syllabus: ${topic || sourceName}\nProduce the paper exactly per the section blueprint above.${seedNote}${excludeNote}${sourceNote}`;
+    const result = await routeChat({ system: buildSystem({ sections, difficulty, level, language, examStyle, grounded }), messages: [{ role: 'user', content: userMsg }], maxTokens: Math.min(7000, 320 * totalQ + 800), temperature: 0.8 });
 
     let parsed;
     try { parsed = extractJson(result.text); } catch { return NextResponse.json({ error: 'The generator returned an unexpected format — please try again.' }, { status: 502 }); }
@@ -153,7 +170,7 @@ export async function POST(req) {
     const balance = creditsEnforced() ? await getBalance(userId) : null;
     const stems = outSections.flatMap((s) => s.questions.map((q) => str(q.q, 140)));
 
-    return NextResponse.json({ ok: true, paper: { title: str(parsed.title || topic, 140), examStyle, language, difficulty, institution, instructions, totalMarks, durationMin, sections: outSections, verified: verifyInfo.verified, fixes: verifyInfo.fixes }, stems, credits, balance, provider: result.provider, model: result.model });
+    return NextResponse.json({ ok: true, paper: { title: str(parsed.title || topic || sourceName, 140), examStyle, language, difficulty, institution, instructions, totalMarks, durationMin, sections: outSections, verified: verifyInfo.verified, fixes: verifyInfo.fixes, grounded, sourceName }, stems, credits, balance, provider: result.provider, model: result.model });
   } catch (e) {
     const status = e.statusCode || 500;
     if (status >= 500) console.error('[studio/paper] failed', e);

@@ -131,6 +131,8 @@ export default function StudioPage() {
   const [includeKey, setIncludeKey] = useState(true);
   const [verify, setVerify] = useState(true);
   const [prevStems, setPrevStems] = useState([]);
+  const [docs, setDocs] = useState([]);
+  const [sourceDocId, setSourceDocId] = useState(0);
   const [busy, setBusy] = useState(false);
   const [paper, setPaper] = useState(null);
   const [used, setUsed] = useState(null);
@@ -140,7 +142,8 @@ export default function StudioPage() {
   const [answers, setAnswers] = useState({});
   const [checked, setChecked] = useState(false);
 
-  useEffect(() => { fetch('/api/credits').then((r) => { if (r.status === 401) { window.location.href = '/signin'; return null; } return r.json(); }).then((j) => { if (j && typeof j.balance === 'number') setCredits(j.balance); }).catch(() => {}); }, []);
+  useEffect(() => { fetch('/api/credits').then((r) => { if (r.status === 401) { window.location.href = '/signin'; return null; } return r.json(); }).then((j) => { if (j && typeof j.balance === 'number') setCredits(j.balance); }).catch(() => {});
+    fetch('/api/documents').then((r) => r.ok ? r.json() : null).then((j) => { if (j && Array.isArray(j.documents)) setDocs(j.documents.filter((d) => d.status === 'ready')); }).catch(() => {}); }, []);
 
   function applyPreset(p) { setExamStyle(p.examStyle); setTopic(p.topic); setSections(p.sections.map((s) => ({ ...s }))); }
   function setSec(i, patch) { setSections((cur) => cur.map((s, j) => j === i ? { ...s, ...patch } : s)); }
@@ -155,10 +158,10 @@ export default function StudioPage() {
 
   async function generate() {
     const t = topic.trim();
-    if (t.length < 3) { setNote('Describe a topic or syllabus first.'); return; }
+    if (t.length < 3 && !sourceDocId) { setNote('Describe a topic, or pick a source document.'); return; }
     setBusy(true); setNote(''); setPaper(null); setUsed(null); setAnswers({}); setChecked(false); setView('paper');
     try {
-      const r = await fetch('/api/studio/paper', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ topic: t, examStyle, level, difficulty, language, institution, instructions, sections: sections.map((s) => ({ title: s.title, types: [s.type], count: Number(s.count), marks: Number(s.marks) })), nonce: Math.random().toString(36).slice(2), exclude: prevStems, verify }) });
+      const r = await fetch('/api/studio/paper', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ topic: t, examStyle, level, difficulty, language, institution, instructions, sections: sections.map((s) => ({ title: s.title, types: [s.type], count: Number(s.count), marks: Number(s.marks) })), nonce: Math.random().toString(36).slice(2), exclude: prevStems, verify, documentId: sourceDocId }) });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) {
         if (r.status === 401) { window.location.href = '/signin'; return; }
@@ -185,6 +188,16 @@ export default function StudioPage() {
         <div className="glass glass-iris-border no-print" style={{ padding: '20px 22px', borderRadius: 'var(--r-xl)' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12 }}>{CATEGORIES.map((c) => <button key={c.k} type="button" onClick={() => setCat(c.k)} className="chip" style={{ cursor: 'pointer', fontSize: 12.5, background: cat === c.k ? 'var(--glass-2)' : 'transparent', color: cat === c.k ? 'var(--text)' : 'var(--text-3)', borderColor: cat === c.k ? 'var(--violet)' : 'var(--stroke-2)' }}>{c.label}</button>)}</div>
           {presets.length > 0 && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12 }}>{presets.map((p) => <button key={p.label} type="button" onClick={() => applyPreset(p)} className="chip" style={{ cursor: 'pointer', fontSize: 12 }} data-testid="preset">{p.label}</button>)}</div>}
+          {docs.length > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 12, color: 'var(--text-3)' }}>Source</span>
+              <select value={sourceDocId} onChange={(e) => setSourceDocId(Number(e.target.value))} style={{ ...ctrl, minWidth: 240 }} data-testid="source-select">
+                <option value={0}>From scratch (topic only)</option>
+                {docs.map((d) => <option key={d.id} value={d.id}>From: {d.filename}{d.pageCount ? ' (' + d.pageCount + ' pp)' : ''}</option>)}
+              </select>
+              {sourceDocId > 0 && <span style={{ fontSize: 11.5, color: 'var(--violet-2)' }}>questions grounded in this document, with page citations</span>}
+            </div>
+          )}
           <textarea value={topic} onChange={(e) => setTopic(e.target.value)} rows={2} placeholder="Describe the topic or syllabus — e.g. Core Java: OOP, collections, exceptions" className="input" data-testid="topic" style={{ width: '100%', resize: 'vertical', minHeight: 52, fontFamily: 'inherit', padding: '10px 13px' }} />
           <div style={{ display: 'flex', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
             <input value={institution} onChange={(e) => setInstitution(e.target.value)} placeholder="Institution / exam name (optional)" className="input" style={{ flex: 1, minWidth: 220, fontSize: 12.5, padding: '8px 12px' }} />
@@ -233,7 +246,7 @@ export default function StudioPage() {
                 <div style={{ textAlign: 'center', borderBottom: '2px solid #111', paddingBottom: 14, marginBottom: 18 }}>
                   {paper.institution && <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#333' }}>{paper.institution}</div>}
                   <div style={{ fontSize: 21, fontWeight: 700, marginTop: paper.institution ? 4 : 0 }}>{paper.title}</div>
-                  <div style={{ fontSize: 12.5, color: '#555', marginTop: 6 }}>Max marks: {paper.totalMarks} · Time: {paper.durationMin} min{paper.examStyle ? ' · ' + paper.examStyle : ''}</div>
+                  <div style={{ fontSize: 12.5, color: '#555', marginTop: 6 }}>Max marks: {paper.totalMarks} · Time: {paper.durationMin} min{paper.examStyle ? ' · ' + paper.examStyle : ''}{paper.grounded && paper.sourceName ? ' · source: ' + paper.sourceName : ''}</div>
                 </div>
                 <div style={{ fontSize: 12, color: '#666', marginBottom: 16 }}>{paper.instructions || 'Instructions: answer all questions.'}{includeKey ? ' The answer key is on the last page.' : ''}</div>
                 {(() => { let n = 0; return paper.sections.map((sec, si) => (
@@ -245,7 +258,7 @@ export default function StudioPage() {
                 {includeKey && (
                   <div className="pagebreak" style={{ marginTop: 26, borderTop: '2px solid #111', paddingTop: 16 }}>
                     <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Answer key</div>
-                    {(() => { let n = 0; return paper.sections.flatMap((sec) => sec.questions.map((q) => { n += 1; return <div key={n} style={{ fontSize: 13, lineHeight: 1.5, marginBottom: 7 }}><b style={{ fontWeight: 600 }}>{n}.</b> {keyAnswer(q)}{q.explanation ? <span style={{ color: '#666' }}> — {q.explanation}</span> : null}</div>; })); })()}
+                    {(() => { let n = 0; return paper.sections.flatMap((sec) => sec.questions.map((q) => { n += 1; return <div key={n} style={{ fontSize: 13, lineHeight: 1.5, marginBottom: 7 }}><b style={{ fontWeight: 600 }}>{n}.</b> {keyAnswer(q)}{q.explanation ? <span style={{ color: '#666' }}> — {q.explanation}</span> : null}{q.page ? <span style={{ color: '#888' }}> [source p.{q.page}]</span> : null}</div>; })); })()}
                   </div>
                 )}
               </div>
