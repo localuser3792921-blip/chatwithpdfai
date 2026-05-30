@@ -324,14 +324,14 @@ export default function StudioPage() {
                 <div style={{ fontSize: 12, color: '#666', marginBottom: 16 }}>{paper.instructions || 'Instructions: answer all questions.'}{includeKey ? ' The answer key is on the last page.' : ''}</div>
                 {(() => { let n = 0; return paper.sections.map((sec, si) => (
                   <div key={si} style={{ marginBottom: 8 }}>
-                    {(sec.title || paper.sections.length > 1) && <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid #ddd', margin: '14px 0 10px', paddingBottom: 4 }}><span style={{ fontSize: 14.5, fontWeight: 700 }}>{sec.title || ('Section ' + String.fromCharCode(65 + si))}</span><span style={{ fontSize: 11.5, color: '#777' }}>{sec.questions.length} × {sec.marks} = {sec.questions.length * sec.marks} marks</span></div>}
-                    {sec.questions.map((q) => { n += 1; return <div key={n} style={{ marginBottom: 16, fontSize: 14, lineHeight: 1.55, display: 'flex', gap: 8 }}><span style={{ fontWeight: 600, flexShrink: 0 }}>{n}.</span><div style={{ flex: 1 }}>{renderBody(q)}</div></div>; })}
+                    {(sec.title || paper.sections.length > 1) && <div className="section-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid #ddd', margin: '14px 0 10px', paddingBottom: 4 }}><span style={{ fontSize: 14.5, fontWeight: 700 }}>{sec.title || ('Section ' + String.fromCharCode(65 + si))}</span><span style={{ fontSize: 11.5, color: '#777' }}>{sec.questions.length} × {sec.marks} = {sec.questions.length * sec.marks} marks</span></div>}
+                    {sec.questions.map((q) => { n += 1; return <div key={n} className="q-block" style={{ marginBottom: 16, fontSize: 14, lineHeight: 1.55, display: 'flex', gap: 8 }}><span style={{ fontWeight: 600, flexShrink: 0 }}>{n}.</span><div style={{ flex: 1 }}>{renderBody(q)}</div></div>; })}
                   </div>
                 )); })()}
                 {includeKey && (
                   <div className="pagebreak" style={{ marginTop: 26, borderTop: '2px solid #111', paddingTop: 16 }}>
                     <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Answer key</div>
-                    {(() => { let n = 0; return paper.sections.flatMap((sec) => sec.questions.map((q) => { n += 1; return <div key={n} style={{ fontSize: 13, lineHeight: 1.5, marginBottom: 7 }}><b style={{ fontWeight: 600 }}>{n}.</b> {keyAnswer(q)}{q.explanation ? <span style={{ color: '#666' }}> — {q.explanation}</span> : null}{q.page ? <span style={{ color: '#888' }}> [source p.{q.page}]</span> : null}</div>; })); })()}
+                    {(() => { let n = 0; return paper.sections.flatMap((sec) => sec.questions.map((q) => { n += 1; return <div key={n} className="key-item" style={{ fontSize: 13, lineHeight: 1.5, marginBottom: 7 }}><b style={{ fontWeight: 600 }}>{n}.</b> {keyAnswer(q)}{q.explanation ? <span style={{ color: '#666' }}> — {q.explanation}</span> : null}{q.page ? <span style={{ color: '#888' }}> [source p.{q.page}]</span> : null}</div>; })); })()}
                   </div>
                 )}
               </div>
@@ -351,7 +351,7 @@ export default function StudioPage() {
           </div>
         )}
       </section>
-      <style dangerouslySetInnerHTML={{ __html: `@media print { body * { visibility: hidden !important; } #paper-print, #paper-print * { visibility: visible !important; } #paper-print { position: absolute; left: 0; top: 0; width: 100%; max-width: none; border: none !important; border-radius: 0 !important; padding: 0 !important; } .pagebreak { page-break-before: always; } }` }} />
+      <style dangerouslySetInnerHTML={{ __html: `@media print { body * { visibility: hidden !important; position: static !important; transform: none !important; filter: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; contain: none !important; will-change: auto !important; perspective: none !important; } #paper-print, #paper-print * { visibility: visible !important; } #paper-print { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; border: none !important; border-radius: 0 !important; } .q-block, .key-item { break-inside: avoid !important; page-break-inside: avoid !important; } .section-head { break-after: avoid !important; page-break-after: avoid !important; } .pagebreak { page-break-before: always !important; break-before: page !important; } }` }} />
     </SiteShell>
   );
 }
