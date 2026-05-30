@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import SiteShell, { PageHeader } from '../_components/Chrome';
+import { toGIFT, toMoodleXML, toCSV, downloadText, slug } from './exporters';
 
 const TYPE_LABELS = { mcq: 'Multiple choice', multi: 'Multi-select', tf: 'True / false', fill: 'Fill the blank', match: 'Match', assertion: 'Assertion–reason', numeric: 'Numeric', short: 'Short answer', long: 'Long answer', code: 'Code output' };
 const ALL_TYPES = Object.keys(TYPE_LABELS);
@@ -235,7 +236,7 @@ export default function StudioPage() {
                 <button onClick={() => setView('paper')} className={view === 'paper' ? 'btn btn-iris btn-sm' : 'btn btn-glass btn-sm'} data-testid="view-paper">Paper</button>
                 <button onClick={() => { setView('practice'); setChecked(false); }} className={view === 'practice' ? 'btn btn-iris btn-sm' : 'btn btn-glass btn-sm'} data-testid="view-practice">Practice</button>
               </div>
-              {view === 'paper' && <><button onClick={() => window.print()} className="btn btn-iris" data-testid="save-pdf">Save as PDF / Print</button><button onClick={generate} className="btn btn-glass">Regenerate</button><span className="mono" style={{ fontSize: 11.5, color: 'var(--text-3)' }}>{includeKey ? 'teacher copy' : 'student copy'}{used != null ? ' · used ' + used + ' CR' : ''}</span>{paper.verified && <span className="mono" style={{ fontSize: 11, color: 'var(--green)' }} data-testid="verified">✓ answers verified{paper.fixes ? ' (' + paper.fixes + ' corrected)' : ''}</span>}</>}
+              {view === 'paper' && <><button onClick={() => window.print()} className="btn btn-iris" data-testid="save-pdf">Save as PDF / Print</button><button onClick={generate} className="btn btn-glass">Regenerate</button><span className="mono" style={{ fontSize: 11.5, color: 'var(--text-3)' }}>{includeKey ? 'teacher copy' : 'student copy'}{used != null ? ' · used ' + used + ' CR' : ''}</span>{paper.verified && <span className="mono" style={{ fontSize: 11, color: 'var(--green)' }} data-testid="verified">✓ answers verified{paper.fixes ? ' (' + paper.fixes + ' corrected)' : ''}</span>}<span style={{ fontSize: 11.5, color: 'var(--text-3)', marginLeft: 4 }}>Export:</span><button onClick={() => downloadText(slug(paper.title) + '.xml', toMoodleXML(paper), 'application/xml')} className="btn btn-glass btn-sm" data-testid="export-xml">Moodle XML</button><button onClick={() => downloadText(slug(paper.title) + '.gift.txt', toGIFT(paper))} className="btn btn-glass btn-sm" data-testid="export-gift">GIFT</button><button onClick={() => downloadText(slug(paper.title) + '.csv', toCSV(paper), 'text/csv')} className="btn btn-glass btn-sm" data-testid="export-csv">CSV</button></>}
               {view === 'practice' && (checked
                 ? <><span style={{ fontSize: 15, fontWeight: 600 }} data-testid="score">Score {correctN} / {autoTotal}{autoTotal ? ' (' + Math.round(100 * correctN / autoTotal) + '%)' : ''}</span>{writtenN > 0 && <span style={{ fontSize: 12, color: 'var(--text-3)' }}>+ {writtenN} written to self-check</span>}<button onClick={() => { setChecked(false); setAnswers({}); }} className="btn btn-glass btn-sm">Try again</button></>
                 : <button onClick={() => setChecked(true)} className="btn btn-iris" data-testid="check-answers">Check answers</button>)}
