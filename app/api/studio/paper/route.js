@@ -3,6 +3,7 @@ import { routeChat } from '@/lib/llm/router';
 import { getCurrentUser } from '@/lib/auth';
 import { getBalance, chargeCredits, creditsEnforced } from '@/lib/credits';
 import { getReadyDocuments, retrievePagesMulti } from '@/lib/store/chat';
+import { query } from '@/lib/db';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -129,6 +130,10 @@ export async function POST(req) {
   if (!u.email_verified) return NextResponse.json({ error: 'Please verify your email before using the product' }, { status: 403 });
   const userId = u.id;
   if (creditsEnforced()) { const bal = await getBalance(userId); if (bal < 1) return NextResponse.json({ error: 'Insufficient credits — buy a pack to continue.' }, { status: 402 }); }
+  const topicKey = (topic || '').toLowerCase().slice(0, 80);
+  let dbSeen = [];
+  try { const seen = await query('SELECT stem FROM studio_seen_questions WHERE user_id = ? AND topic_key = ? ORDER BY created_at DESC LIMIT 120', [userId, topicKey]); dbSeen = seen.map((r) => r.stem); } catch (e) {}
+  const allExclude = [...new Set([...exclude, ...dbSeen])].slice(0, 100);
 
   let sourceContext = '', grounded = false, sourceName = '';
   if (documentId) {
@@ -145,7 +150,7 @@ export async function POST(req) {
   }
   const totalQ = sections.reduce((n, s) => n + s.count, 0);
   try {
-    const excludeNote = exclude.length ? `\n\nThese questions were already used — do NOT repeat or paraphrase any of them. Generate entirely new questions on fresh sub-topics:\n- ${exclude.join('\n- ')}` : '';
+    const excludeNote = allExclude.length ? `\n\nThese questions were already used — do NOT repeat or paraphrase any of them. Generate entirely new questions on fresh sub-topics:\n- ${allExclude.join('\n- ')}` : '';
     const seedNote = nonce ? `\nVariation seed: ${nonce}. Use it to pick different sub-topics, examples and phrasing than a typical paper.` : '';
     const sourceNote = grounded ? `\n\nSOURCE MATERIAL — base every question on this and cite the page numbers shown:\n${sourceContext}` : '';
     const userMsg = `Topic / syllabus: ${topic || sourceName}\nProduce the paper exactly per the section blueprint above.${seedNote}${excludeNote}${sourceNote}`;
@@ -160,6 +165,7 @@ export async function POST(req) {
     let totalCredits = result.credits;
     let verifyInfo = { verified: false, fixes: 0 };
     if (verify) { const vr = await verifyPass(outSections); totalCredits += vr.credits; verifyInfo = { verified: true, fixes: vr.fixes }; }
+    try { const newStems = outSections.flatMap((s) => s.questions.map((q) => str(q.q, 200))).filter(Boolean); if (newStems.length) { const ph = newStems.map(() => '(?,?,?)').join(','); const params = []; newStems.forEach((st2) => params.push(userId, topicKey, st2)); await query(`INSERT INTO studio_seen_questions (user_id, topic_key, stem) VALUES ${ph}`, params); } } catch (e) {}
 
     const totalMarks = outSections.reduce((m, s) => m + s.marks * s.questions.length, 0);
     const nQ = outSections.reduce((n, s) => n + s.questions.length, 0);
