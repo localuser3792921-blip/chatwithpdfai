@@ -136,6 +136,8 @@ export default function StudioPage() {
   const [sourceDocId, setSourceDocId] = useState(0);
   const [library, setLibrary] = useState([]);
   const [savedMsg, setSavedMsg] = useState('');
+  const [shares, setShares] = useState([]);
+  const [shareMsg, setShareMsg] = useState('');
   const [busy, setBusy] = useState(false);
   const [paper, setPaper] = useState(null);
   const [used, setUsed] = useState(null);
@@ -147,7 +149,7 @@ export default function StudioPage() {
 
   useEffect(() => { fetch('/api/credits').then((r) => { if (r.status === 401) { window.location.href = '/signin'; return null; } return r.json(); }).then((j) => { if (j && typeof j.balance === 'number') setCredits(j.balance); }).catch(() => {});
     fetch('/api/documents').then((r) => r.ok ? r.json() : null).then((j) => { if (j && Array.isArray(j.documents)) setDocs(j.documents.filter((d) => d.status === 'ready')); }).catch(() => {});
-    loadLibrary(); }, []);
+    loadLibrary(); loadShares(); }, []);
 
   function applyPreset(p) { setExamStyle(p.examStyle); setTopic(p.topic); setSections(p.sections.map((s) => ({ ...s }))); }
   function setSec(i, patch) { setSections((cur) => cur.map((s, j) => j === i ? { ...s, ...patch } : s)); }
@@ -157,6 +159,9 @@ export default function StudioPage() {
   async function savePaper() { if (!paper) return; setSavedMsg('Saving\u2026'); try { const r = await fetch('/api/studio/papers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paper }) }); const j = await r.json().catch(() => ({})); if (r.ok) { setSavedMsg('Saved to library'); loadLibrary(); setTimeout(() => setSavedMsg(''), 2200); } else setSavedMsg(j.error || 'Save failed'); } catch (e) { setSavedMsg(e.message); } }
   async function openPaper(id) { try { const r = await fetch('/api/studio/papers?id=' + id); const j = await r.json().catch(() => ({})); if (r.ok && j.paper) { setPaper(j.paper); setView('paper'); setChecked(false); setAnswers({}); setUsed(null); setTimeout(() => { const el = document.getElementById('result-top'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); } } catch (e) {} }
   async function delPaper(id) { try { await fetch('/api/studio/papers?id=' + id, { method: 'DELETE' }); loadLibrary(); } catch (e) {} }
+  function loadShares() { fetch('/api/studio/assignments').then((r) => r.ok ? r.json() : null).then((j) => { if (j && Array.isArray(j.assignments)) setShares(j.assignments); }).catch(() => {}); }
+  async function shareTest() { if (!paper) return; setShareMsg('Creating link\u2026'); try { const r = await fetch('/api/studio/assignments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paper }) }); const j = await r.json().catch(() => ({})); if (r.ok && j.token) { const url = window.location.origin + '/t/' + j.token; try { await navigator.clipboard.writeText(url); setShareMsg('Link copied \u2014 ' + url); } catch (e2) { setShareMsg('Share link: ' + url); } loadShares(); } else setShareMsg(j.error || 'Could not create link'); } catch (e) { setShareMsg(e.message); } }
+  async function delShare(id) { try { await fetch('/api/studio/assignments?id=' + id, { method: 'DELETE' }); loadShares(); } catch (e) {} }
   const totalQ = sections.reduce((n, s) => n + Number(s.count || 0), 0);
   const totalMarks = sections.reduce((m, s) => m + Number(s.count || 0) * Number(s.marks || 1), 0);
   const flat = paper ? paper.sections.flatMap((s) => s.questions) : [];
@@ -254,6 +259,23 @@ export default function StudioPage() {
           </div>
         )}
 
+        {shares.length > 0 && (
+          <div className="no-print" style={{ marginTop: 16 }}>
+            <div className="eyebrow" style={{ marginBottom: 8 }}>Shared tests ({shares.length})</div>
+            <div style={{ display: 'grid', gap: 7 }}>
+              {shares.map((sh) => (
+                <div key={sh.id} className="glass" style={{ padding: '9px 12px', borderRadius: 'var(--r)', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }} data-testid="share-row">
+                  <span style={{ fontSize: 12.5, fontWeight: 500, flex: 1, minWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sh.title}</span>
+                  <a href={'/t/' + sh.token} target="_blank" rel="noreferrer" className="mono" style={{ fontSize: 11, color: 'var(--violet-2)' }}>open</a>
+                  <span className="mono" style={{ fontSize: 10.5, color: 'var(--text-3)' }}>{sh.attempts} attempts{sh.attempts ? ' \u00b7 avg ' + sh.avgPct + '%' : ''}</span>
+                  <button onClick={() => { if (navigator.clipboard) navigator.clipboard.writeText(window.location.origin + '/t/' + sh.token); }} className="btn btn-glass btn-sm" style={{ fontSize: 11, padding: '3px 9px' }}>Copy link</button>
+                  <button onClick={() => delShare(sh.id)} className="btn btn-glass btn-sm" style={{ fontSize: 11, padding: '3px 9px' }} aria-label="Delete shared test">✕</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {paper && (
           <div id="result-top">
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '22px 0 12px', flexWrap: 'wrap' }} className="no-print">
@@ -261,7 +283,7 @@ export default function StudioPage() {
                 <button onClick={() => setView('paper')} className={view === 'paper' ? 'btn btn-iris btn-sm' : 'btn btn-glass btn-sm'} data-testid="view-paper">Paper</button>
                 <button onClick={() => { setView('practice'); setChecked(false); }} className={view === 'practice' ? 'btn btn-iris btn-sm' : 'btn btn-glass btn-sm'} data-testid="view-practice">Practice</button>
               </div>
-              {view === 'paper' && <><button onClick={() => window.print()} className="btn btn-iris" data-testid="save-pdf">Save as PDF / Print</button><button onClick={generate} className="btn btn-glass">Regenerate</button><button onClick={savePaper} className="btn btn-glass" data-testid="save-library">+ Save to library</button><span className="mono" style={{ fontSize: 11.5, color: 'var(--text-3)' }}>{includeKey ? 'teacher copy' : 'student copy'}{used != null ? ' · used ' + used + ' CR' : ''}</span>{paper.verified && <span className="mono" style={{ fontSize: 11, color: 'var(--green)' }} data-testid="verified">✓ answers verified{paper.fixes ? ' (' + paper.fixes + ' corrected)' : ''}</span>}<span style={{ fontSize: 11.5, color: 'var(--text-3)', marginLeft: 4 }}>Export:</span><button onClick={() => downloadText(slug(paper.title) + '.xml', toMoodleXML(paper), 'application/xml')} className="btn btn-glass btn-sm" data-testid="export-xml">Moodle XML</button><button onClick={() => downloadText(slug(paper.title) + '.gift.txt', toGIFT(paper))} className="btn btn-glass btn-sm" data-testid="export-gift">GIFT</button><button onClick={() => downloadText(slug(paper.title) + '.csv', toCSV(paper), 'text/csv')} className="btn btn-glass btn-sm" data-testid="export-csv">CSV</button>{savedMsg && <span className="mono" style={{ fontSize: 11, color: 'var(--green)' }} data-testid="saved-msg">{savedMsg}</span>}</>}
+              {view === 'paper' && <><button onClick={() => window.print()} className="btn btn-iris" data-testid="save-pdf">Save as PDF / Print</button><button onClick={generate} className="btn btn-glass">Regenerate</button><button onClick={savePaper} className="btn btn-glass" data-testid="save-library">+ Save to library</button><button onClick={shareTest} className="btn btn-glass" data-testid="share-test">Share as test</button><span className="mono" style={{ fontSize: 11.5, color: 'var(--text-3)' }}>{includeKey ? 'teacher copy' : 'student copy'}{used != null ? ' · used ' + used + ' CR' : ''}</span>{paper.verified && <span className="mono" style={{ fontSize: 11, color: 'var(--green)' }} data-testid="verified">✓ answers verified{paper.fixes ? ' (' + paper.fixes + ' corrected)' : ''}</span>}<span style={{ fontSize: 11.5, color: 'var(--text-3)', marginLeft: 4 }}>Export:</span><button onClick={() => downloadText(slug(paper.title) + '.xml', toMoodleXML(paper), 'application/xml')} className="btn btn-glass btn-sm" data-testid="export-xml">Moodle XML</button><button onClick={() => downloadText(slug(paper.title) + '.gift.txt', toGIFT(paper))} className="btn btn-glass btn-sm" data-testid="export-gift">GIFT</button><button onClick={() => downloadText(slug(paper.title) + '.csv', toCSV(paper), 'text/csv')} className="btn btn-glass btn-sm" data-testid="export-csv">CSV</button>{savedMsg && <span className="mono" style={{ fontSize: 11, color: 'var(--green)' }} data-testid="saved-msg">{savedMsg}</span>}{shareMsg && <span className="mono" style={{ fontSize: 11, color: 'var(--violet-2)' }} data-testid="share-msg">{shareMsg}</span>}</>}
               {view === 'practice' && (checked
                 ? <><span style={{ fontSize: 15, fontWeight: 600 }} data-testid="score">Score {correctN} / {autoTotal}{autoTotal ? ' (' + Math.round(100 * correctN / autoTotal) + '%)' : ''}</span>{writtenN > 0 && <span style={{ fontSize: 12, color: 'var(--text-3)' }}>+ {writtenN} written to self-check</span>}<button onClick={() => { setChecked(false); setAnswers({}); }} className="btn btn-glass btn-sm">Try again</button></>
                 : <button onClick={() => setChecked(true)} className="btn btn-iris" data-testid="check-answers">Check answers</button>)}
