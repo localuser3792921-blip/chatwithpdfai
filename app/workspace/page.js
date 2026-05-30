@@ -4,6 +4,25 @@ import { useState, useEffect, useRef } from 'react';
 async function jget(url) { const r = await fetch(url); const j = await r.json().catch(() => ({})); return { ok: r.ok, status: r.status, j }; }
 function fmtSize(b) { if (!b) return ''; const mb = b / 1048576; return mb >= 1 ? mb.toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; }
 
+const STARTERS = ['Summarize this document', 'What are the key points?', 'List the main sections', 'Any important dates or figures?'];
+
+function exportConversation(doc, messages) {
+  if (!messages || messages.length === 0) { alert('No conversation to export yet \u2014 ask a question first.'); return; }
+  const date = new Date().toISOString().slice(0, 10);
+  const out = [`# CHATWITHPDFAI \u2014 ${doc?.filename || 'Conversation'}`, `Exported ${date}${doc?.pageCount ? ' \u00b7 ' + doc.pageCount + ' pages' : ''}`, ''];
+  for (const m of messages) {
+    if (m.role === 'user') { out.push('## You', '', m.text, ''); }
+    else {
+      out.push('## Assistant', '', m.text, '');
+      if (m.citations && m.citations.length) out.push('', `_Cited pages: ${m.citations.map((p) => 'p.' + p).join(', ')}_`, '');
+    }
+  }
+  const blob = new Blob([out.join('\n')], { type: 'text/markdown' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  const safe = (doc?.filename || 'conversation').replace(/\.pdf$/i, '').replace(/[^\w.-]+/g, '_').slice(0, 40);
+  a.download = `${safe}-conversation.md`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
 function FormattedText({ text }) {
   const lines = String(text).split('\n');
   return (
@@ -136,13 +155,13 @@ function DocViewer({ docId, jumpPage }) {
   );
 }
 
-function ChatPane({ doc, onCite, onCreditsUsed }) {
-  const [messages, setMessages] = useState([]);
+function ChatPane({ doc, onCite, onCreditsUsed, messages, setMessages }) {
   const [convId, setConvId] = useState(null);
   const [draft, setDraft] = useState('');
   const [pending, setPending] = useState(false);
   const [note, setNote] = useState('');
   const listRef = useRef(null);
+  const taRef = useRef(null);
   useEffect(() => { setMessages([]); setConvId(null); setNote(''); }, [doc?.id]);
   useEffect(() => { if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight; }, [messages, pending]);
 
@@ -150,6 +169,7 @@ function ChatPane({ doc, onCite, onCreditsUsed }) {
     const q = (text || '').trim();
     if (!q || pending || !doc) return;
     setMessages((m) => [...m, { role: 'user', text: q }]); setDraft(''); setPending(true); setNote('');
+    if (taRef.current) taRef.current.style.height = 'auto';
     try {
       const r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ documentId: doc.id, message: q, conversationId: convId }) });
       const j = await r.json().catch(() => ({}));
@@ -176,7 +196,14 @@ function ChatPane({ doc, onCite, onCreditsUsed }) {
       </div>
       <div ref={listRef} style={{ flex: 1, overflowY: 'auto', padding: '22px 22px 12px', display: 'flex', flexDirection: 'column', gap: 18 }}>
         {messages.length === 0 && !pending && (
-          <div style={{ color: 'var(--text-4)', fontSize: 13.5, textAlign: 'center', marginTop: 30 }}>Ask anything about <strong style={{ color: 'var(--text-2)' }}>{doc?.filename}</strong>. Answers cite the exact page.</div>
+          <div style={{ textAlign: 'center', marginTop: 30 }}>
+            <div style={{ color: 'var(--text-4)', fontSize: 13.5, marginBottom: 16 }}>Ask anything about <strong style={{ color: 'var(--text-2)' }}>{doc?.filename}</strong>. Answers cite the exact page.</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', maxWidth: 420, margin: '0 auto' }}>
+              {STARTERS.map((s) => (
+                <button key={s} onClick={() => ask(s)} disabled={!doc || pending} className="chip" style={{ fontSize: 12, padding: '7px 12px', cursor: 'pointer', color: 'var(--text-2)' }}>{s}</button>
+              ))}
+            </div>
+          </div>
         )}
         {messages.map((m, i) => m.role === 'user' ? (
           <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 5 }}>
@@ -204,7 +231,7 @@ function ChatPane({ doc, onCite, onCreditsUsed }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxWidth: '70%' }}>
             <div className="eyebrow" style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--grad-iris-2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: '#fff' }}>AI</span>Reading the document…</div>
             <div className="glass" style={{ padding: '14px 16px', borderRadius: '18px 18px 18px 4px', borderLeft: '2px solid var(--violet)', display: 'flex', gap: 8, alignItems: 'center' }}>
-              {[0, 1, 2].map((i) => <span key={i} style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--violet)' }}></span>)}
+              {[0, 1, 2].map((i) => <span key={i} className="cwpa-dot" style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--violet)', animationDelay: `${i * 0.16}s` }}></span>)}
               <span className="mono" style={{ fontSize: 10.5, color: 'var(--text-3)', marginLeft: 8, letterSpacing: '0.1em' }}>SEARCHING…</span>
             </div>
           </div>
@@ -213,7 +240,7 @@ function ChatPane({ doc, onCite, onCreditsUsed }) {
       <div style={{ padding: '14px 18px 18px', borderTop: '1px solid var(--stroke-1)', flexShrink: 0 }}>
         {note && <div style={{ marginBottom: 10, fontSize: 12.5, color: '#ffb4b4' }}>{note} {note.includes('credits') && <a href="/buy" style={{ color: 'var(--violet-2)' }}>Buy credits →</a>}</div>}
         <div style={{ display: 'flex', gap: 8 }}>
-          <input value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') ask(draft); }} placeholder="Ask anything about the document…" className="input" data-testid="question" style={{ flex: 1, padding: '12px 14px' }} disabled={!doc} />
+          <textarea ref={taRef} value={draft} rows={1} onChange={(e) => setDraft(e.target.value)} onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 140) + 'px'; }} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(draft); } }} placeholder="Ask anything about the document…  (Shift+Enter = new line)" className="input" data-testid="question" style={{ flex: 1, padding: '11px 14px', resize: 'none', minHeight: 44, maxHeight: 140, height: 44, lineHeight: 1.5, fontFamily: 'inherit', overflowY: 'auto' }} disabled={!doc} />
           <button onClick={() => ask(draft)} className={draft.trim() ? 'btn btn-iris' : 'btn btn-glass'} data-testid="ask-btn" disabled={!draft.trim() || pending || !doc}>Ask ↵</button>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, fontSize: 11, color: 'var(--text-4)' }}>
@@ -263,7 +290,7 @@ function UploadModal({ open, onClose, onUploaded }) {
           )}
           {stage === 'uploading' && (
             <div style={{ textAlign: 'center', padding: '20px 0' }}>
-              <div style={{ display: 'inline-flex', gap: 8, marginBottom: 18 }}>{[0, 1, 2].map((i) => <span key={i} style={{ width: 9, height: 9, borderRadius: '50%', background: 'var(--violet)' }}></span>)}</div>
+              <div style={{ display: 'inline-flex', gap: 8, marginBottom: 18 }}>{[0, 1, 2].map((i) => <span key={i} className="cwpa-dot" style={{ width: 9, height: 9, borderRadius: '50%', background: 'var(--violet)', animationDelay: `${i * 0.16}s` }}></span>)}</div>
               <div className="eyebrow" style={{ color: 'var(--violet-2)', marginBottom: 10 }}>● Extracting text & indexing…</div>
               <p style={{ fontSize: 14, color: 'var(--text-2)', margin: 0 }}>Processing <strong style={{ color: 'var(--text)' }}>{name}</strong></p>
               <p style={{ fontSize: 12, color: 'var(--text-3)', margin: '4px 0 0' }}>This can take a moment for large PDFs.</p>
@@ -302,6 +329,7 @@ export default function WorkspacePage() {
   const [credits, setCredits] = useState(null);
   const [showUpload, setShowUpload] = useState(false);
   const [jumpPage, setJumpPage] = useState(null);
+  const [messages, setMessages] = useState([]);
 
   async function loadDocs(selectId) {
     const d = await jget('/api/documents');
@@ -323,22 +351,20 @@ export default function WorkspacePage() {
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <Header credits={credits} docTitle={active?.filename?.slice(0, 30)} onUpload={() => setShowUpload(true)} onExport={() => {
-        const c = (docs || []).find((x) => x.id === activeId); window.cwpaExport && window.cwpaExport();
-        const txt = `CHATWITHPDFAI — ${c?.filename || 'workspace'}\n`; const blob = new Blob([txt], { type: 'text/plain' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'conversation.txt'; a.click();
-      }} />
+      <Header credits={credits} docTitle={active?.filename?.slice(0, 30)} onUpload={() => setShowUpload(true)} onExport={() => exportConversation(active, messages)} />
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
-        <Sidebar docs={docs} activeId={activeId} onPick={setActiveId} onNew={() => setActiveId(null)} onUpload={() => setShowUpload(true)} />
+        <Sidebar docs={docs} activeId={activeId} onPick={setActiveId} onNew={() => { setActiveId(null); setMessages([]); }} onUpload={() => setShowUpload(true)} />
         {active ? (
           <div style={{ display: 'flex', flex: 1, minWidth: 0 }}>
             <DocViewer docId={activeId} jumpPage={jumpPage} />
-            <ChatPane doc={active} onCite={onCite} onCreditsUsed={(used) => setCredits((c) => (c == null ? c : Math.max(0, c - used)))} />
+            <ChatPane doc={active} onCite={onCite} messages={messages} setMessages={setMessages} onCreditsUsed={(used) => setCredits((c) => (c == null ? c : Math.max(0, c - used)))} />
           </div>
         ) : (
           <EmptyState onUpload={() => setShowUpload(true)} />
         )}
       </div>
       <UploadModal open={showUpload} onClose={() => setShowUpload(false)} onUploaded={(doc) => { if (doc?.id) loadDocs(doc.id); jget('/api/credits').then((c) => { if (c.ok) setCredits(c.j.balance); }); }} />
+      <style dangerouslySetInnerHTML={{ __html: `@keyframes cwpaBounce{0%,80%,100%{transform:scale(0.5);opacity:0.4}40%{transform:scale(1);opacity:1}} .cwpa-dot{animation:cwpaBounce 1.2s ease-in-out infinite}` }} />
     </div>
   );
 }
