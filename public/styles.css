@@ -66,6 +66,7 @@
 *::-webkit-scrollbar-thumb:hover { background: var(--stroke-3); }
 
 html, body {
+  color-scheme: dark;
   margin: 0;
   background: var(--bg);
   color: var(--text);
@@ -478,3 +479,7 @@ button { font-family: inherit; }
   .masthead-inner { padding: 0 16px; gap: 12px; }
   .spread { padding: 0 18px; }
 }
+
+/* Native form-control popups render dark (fixes light <select> dropdown lists) */
+select { color-scheme: dark; }
+select option, select optgroup { background-color: #0b0c1f; color: #e8e8f0; }
