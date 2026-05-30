@@ -119,6 +119,16 @@ function Feedback({ q, ua }) {
   return <div style={{ marginTop: 8, fontSize: 12.5, color: ok ? 'var(--green)' : '#ffb4b4' }}><b style={{ fontWeight: 600 }}>{ok ? '✓ Correct' : '✗ Correct answer:'}</b> {ok ? '' : keyAnswer(q)}{q.explanation ? <span style={{ color: 'var(--text-3)' }}> — {q.explanation}</span> : null}</div>;
 }
 
+function EditAnswerControl({ q, gi, onPatch }) {
+  const sel = { padding: '5px 8px', borderRadius: 'var(--r)', background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', color: 'var(--text)', fontSize: 12.5, fontFamily: 'inherit' };
+  if (q.type === 'mcq' || q.type === 'code' || q.type === 'assertion') return <select value={q.answer} onChange={(e) => onPatch(gi, { answer: Number(e.target.value) })} style={{ ...sel, maxWidth: 340 }}>{q.options.map((o, oi) => <option key={oi} value={oi}>({LETTER(oi)}) {String(o).slice(0, 50)}</option>)}</select>;
+  if (q.type === 'tf') return <select value={q.answer ? '1' : '0'} onChange={(e) => onPatch(gi, { answer: e.target.value === '1' })} style={sel}><option value="1">True</option><option value="0">False</option></select>;
+  if (q.type === 'multi') return <span style={{ display: 'inline-flex', gap: 12, flexWrap: 'wrap' }}>{q.options.map((o, oi) => { const on = Array.isArray(q.answers) && q.answers.includes(oi); return <label key={oi} style={{ fontSize: 12.5, color: 'var(--text-2)' }}><input type="checkbox" checked={on} onChange={() => onPatch(gi, { answers: on ? q.answers.filter((x) => x !== oi) : [...(q.answers || []), oi] })} /> {LETTER(oi)}</label>; })}</span>;
+  if (q.type === 'fill' || q.type === 'numeric') return <input value={q.answer || ''} onChange={(e) => onPatch(gi, { answer: e.target.value })} className="input" style={{ minWidth: 180, fontSize: 12.5, padding: '6px 10px' }} />;
+  if (q.type === 'short' || q.type === 'long') return <input value={q.modelAnswer || ''} onChange={(e) => onPatch(gi, { modelAnswer: e.target.value })} className="input" style={{ minWidth: 300, fontSize: 12.5, padding: '6px 10px' }} />;
+  return <span style={{ fontSize: 12, color: 'var(--text-3)' }}>(not editable)</span>;
+}
+
 export default function StudioPage() {
   const [cat, setCat] = useState('programming');
   const [examStyle, setExamStyle] = useState('');
@@ -146,6 +156,7 @@ export default function StudioPage() {
   const [view, setView] = useState('paper');
   const [answers, setAnswers] = useState({});
   const [checked, setChecked] = useState(false);
+  const [editAns, setEditAns] = useState(false);
 
   useEffect(() => { fetch('/api/credits').then((r) => { if (r.status === 401) { window.location.href = '/signin'; return null; } return r.json(); }).then((j) => { if (j && typeof j.balance === 'number') setCredits(j.balance); }).catch(() => {});
     fetch('/api/documents').then((r) => r.ok ? r.json() : null).then((j) => { if (j && Array.isArray(j.documents)) setDocs(j.documents.filter((d) => d.status === 'ready')); }).catch(() => {});
@@ -162,6 +173,7 @@ export default function StudioPage() {
   function loadShares() { fetch('/api/studio/assignments').then((r) => r.ok ? r.json() : null).then((j) => { if (j && Array.isArray(j.assignments)) setShares(j.assignments); }).catch(() => {}); }
   async function shareTest() { if (!paper) return; setShareMsg('Creating link\u2026'); try { const r = await fetch('/api/studio/assignments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paper }) }); const j = await r.json().catch(() => ({})); if (r.ok && j.token) { const url = window.location.origin + '/t/' + j.token; try { await navigator.clipboard.writeText(url); setShareMsg('Link copied \u2014 ' + url); } catch (e2) { setShareMsg('Share link: ' + url); } loadShares(); } else setShareMsg(j.error || 'Could not create link'); } catch (e) { setShareMsg(e.message); } }
   async function delShare(id) { try { await fetch('/api/studio/assignments?id=' + id, { method: 'DELETE' }); loadShares(); } catch (e) {} }
+  function patchQ(gi, patch) { setPaper((pp) => { if (!pp) return pp; let n = -1; return { ...pp, sections: pp.sections.map((s) => ({ ...s, questions: s.questions.map((q) => { n += 1; return n === gi ? { ...q, ...patch } : q; }) })) }; }); }
   const totalQ = sections.reduce((n, s) => n + Number(s.count || 0), 0);
   const totalMarks = sections.reduce((m, s) => m + Number(s.count || 0) * Number(s.marks || 1), 0);
   const flat = paper ? paper.sections.flatMap((s) => s.questions) : [];
@@ -283,12 +295,25 @@ export default function StudioPage() {
                 <button onClick={() => setView('paper')} className={view === 'paper' ? 'btn btn-iris btn-sm' : 'btn btn-glass btn-sm'} data-testid="view-paper">Paper</button>
                 <button onClick={() => { setView('practice'); setChecked(false); }} className={view === 'practice' ? 'btn btn-iris btn-sm' : 'btn btn-glass btn-sm'} data-testid="view-practice">Practice</button>
               </div>
-              {view === 'paper' && <><button onClick={() => window.print()} className="btn btn-iris" data-testid="save-pdf">Save as PDF / Print</button><button onClick={generate} className="btn btn-glass">Regenerate</button><button onClick={savePaper} className="btn btn-glass" data-testid="save-library">+ Save to library</button><button onClick={shareTest} className="btn btn-glass" data-testid="share-test">Share as test</button><span className="mono" style={{ fontSize: 11.5, color: 'var(--text-3)' }}>{includeKey ? 'teacher copy' : 'student copy'}{used != null ? ' · used ' + used + ' CR' : ''}</span>{paper.verified && <span className="mono" style={{ fontSize: 11, color: 'var(--green)' }} data-testid="verified">✓ answers verified{paper.fixes ? ' (' + paper.fixes + ' corrected)' : ''}</span>}<span style={{ fontSize: 11.5, color: 'var(--text-3)', marginLeft: 4 }}>Export:</span><button onClick={() => downloadText(slug(paper.title) + '.xml', toMoodleXML(paper), 'application/xml')} className="btn btn-glass btn-sm" data-testid="export-xml">Moodle XML</button><button onClick={() => downloadText(slug(paper.title) + '.gift.txt', toGIFT(paper))} className="btn btn-glass btn-sm" data-testid="export-gift">GIFT</button><button onClick={() => downloadText(slug(paper.title) + '.csv', toCSV(paper), 'text/csv')} className="btn btn-glass btn-sm" data-testid="export-csv">CSV</button>{savedMsg && <span className="mono" style={{ fontSize: 11, color: 'var(--green)' }} data-testid="saved-msg">{savedMsg}</span>}{shareMsg && <span className="mono" style={{ fontSize: 11, color: 'var(--violet-2)' }} data-testid="share-msg">{shareMsg}</span>}</>}
+              {view === 'paper' && <><button onClick={() => window.print()} className="btn btn-iris" data-testid="save-pdf">Save as PDF / Print</button><button onClick={generate} className="btn btn-glass">Regenerate</button><button onClick={savePaper} className="btn btn-glass" data-testid="save-library">+ Save to library</button><button onClick={shareTest} className="btn btn-glass" data-testid="share-test">Share as test</button><button onClick={() => setEditAns((v) => !v)} className={editAns ? 'btn btn-iris' : 'btn btn-glass'} data-testid="edit-answers">{editAns ? 'Done editing' : 'Edit answers'}</button><span className="mono" style={{ fontSize: 11.5, color: 'var(--text-3)' }}>{includeKey ? 'teacher copy' : 'student copy'}{used != null ? ' · used ' + used + ' CR' : ''}</span>{paper.verified && <span className="mono" style={{ fontSize: 11, color: 'var(--green)' }} data-testid="verified">✓ answers verified{paper.fixes ? ' (' + paper.fixes + ' corrected)' : ''}</span>}<span style={{ fontSize: 11.5, color: 'var(--text-3)', marginLeft: 4 }}>Export:</span><button onClick={() => downloadText(slug(paper.title) + '.xml', toMoodleXML(paper), 'application/xml')} className="btn btn-glass btn-sm" data-testid="export-xml">Moodle XML</button><button onClick={() => downloadText(slug(paper.title) + '.gift.txt', toGIFT(paper))} className="btn btn-glass btn-sm" data-testid="export-gift">GIFT</button><button onClick={() => downloadText(slug(paper.title) + '.csv', toCSV(paper), 'text/csv')} className="btn btn-glass btn-sm" data-testid="export-csv">CSV</button>{savedMsg && <span className="mono" style={{ fontSize: 11, color: 'var(--green)' }} data-testid="saved-msg">{savedMsg}</span>}{shareMsg && <span className="mono" style={{ fontSize: 11, color: 'var(--violet-2)' }} data-testid="share-msg">{shareMsg}</span>}</>}
               {view === 'practice' && (checked
                 ? <><span style={{ fontSize: 15, fontWeight: 600 }} data-testid="score">Score {correctN} / {autoTotal}{autoTotal ? ' (' + Math.round(100 * correctN / autoTotal) + '%)' : ''}</span>{writtenN > 0 && <span style={{ fontSize: 12, color: 'var(--text-3)' }}>+ {writtenN} written to self-check</span>}<button onClick={() => { setChecked(false); setAnswers({}); }} className="btn btn-glass btn-sm">Try again</button></>
                 : <button onClick={() => setChecked(true)} className="btn btn-iris" data-testid="check-answers">Check answers</button>)}
             </div>
 
+            {editAns && (
+              <div className="no-print glass" style={{ padding: '16px 18px', borderRadius: 'var(--r-lg)', maxWidth: 820, margin: '0 auto 14px' }}>
+                <div className="eyebrow" style={{ marginBottom: 4 }}>Edit answer key</div>
+                <div style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 12 }}>AI answers can occasionally be wrong — fix any here before you print, save or share. Changes apply everywhere.</div>
+                {(() => { let n = 0; return paper.sections.flatMap((sec) => sec.questions.map((q) => { const gi = n++; return (
+                  <div key={gi} style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 8, fontSize: 13 }}>
+                    <span style={{ fontWeight: 600, color: 'var(--violet-2)', minWidth: 24 }}>{gi + 1}.</span>
+                    <span style={{ flex: 1, minWidth: 0, color: 'var(--text-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{String(q.q || q.assertion || '').replace(/\n/g, ' ').slice(0, 64)}</span>
+                    <EditAnswerControl q={q} gi={gi} onPatch={patchQ} />
+                  </div>
+                ); })); })()}
+              </div>
+            )}
             {view === 'paper' ? (
               <div id="paper-print" style={{ background: '#fff', color: '#111', borderRadius: 'var(--r-lg)', padding: '40px 44px', maxWidth: 820, margin: '0 auto', border: '1px solid var(--stroke-2)' }}>
                 <div style={{ textAlign: 'center', borderBottom: '2px solid #111', paddingBottom: 14, marginBottom: 18 }}>
