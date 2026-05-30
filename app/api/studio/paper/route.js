@@ -104,7 +104,7 @@ async function verifyPass(sections) {
   if (!items.length) return { credits: 0, fixes: 0 };
   const sys = `You are a meticulous exam answer-checker. For each numbered item, decide whether the "Marked" answer is correct. Override ONLY when you are confident the marked answer is wrong. For option items give the correct option index (integer); for true/false give true or false; for fill/numeric give the correct text/number. Output ONLY JSON: {"fixes":[{"i":<index>,"correct":<index|true|false|"text">}]}. Include only the items you are correcting; if all are right, return {"fixes":[]}.`;
   let result;
-  try { result = await routeChat({ system: sys, messages: [{ role: 'user', content: items.map((x) => x.line).join('\n\n') }], maxTokens: 1200, temperature: 0.1 }); }
+  try { result = await routeChat({ system: sys, messages: [{ role: 'user', content: items.map((x) => x.line).join('\n\n') }], maxTokens: 1200, temperature: 0.1, jsonMode: true }); }
   catch { return { credits: 0, fixes: 0 }; }
   let parsed; try { parsed = extractJson(result.text); } catch { return { credits: result.credits || 0, fixes: 0 }; }
   const fixes = Array.isArray(parsed.fixes) ? parsed.fixes : [];
@@ -166,7 +166,7 @@ export async function POST(req) {
     const seedNote = nonce ? `\nVariation seed: ${nonce}. Use it to pick different sub-topics, examples and phrasing than a typical paper.` : '';
     const sourceNote = grounded ? `\n\nSOURCE MATERIAL — base every question on this and cite the page numbers shown:\n${sourceContext}` : '';
     const userMsg = `Topic / syllabus: ${topic || sourceName}\nProduce the paper exactly per the section blueprint above.${seedNote}${excludeNote}${sourceNote}`;
-    const result = await routeChat({ system: buildSystem({ sections, difficulty, level, language, examStyle, grounded }), messages: [{ role: 'user', content: userMsg }], maxTokens: Math.min(8000, 500 * totalQ + 1500), temperature: 0.8 });
+    const result = await routeChat({ system: buildSystem({ sections, difficulty, level, language, examStyle, grounded }), messages: [{ role: 'user', content: userMsg }], maxTokens: Math.min(8000, 500 * totalQ + 1500), temperature: 0.8, jsonMode: true });
 
     let parsed;
     try { parsed = extractJson(result.text); } catch { return NextResponse.json({ error: 'The generator returned an unexpected format — please try again.' }, { status: 502 }); }
