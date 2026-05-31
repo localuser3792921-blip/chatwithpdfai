@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import SiteShell, { PageHeader } from '../_components/Chrome';
 import { toGIFT, toMoodleXML, toCSV, downloadText, slug } from './exporters';
 
 const TYPE_LABELS = { mcq: 'Multiple choice', multi: 'Multi-select', tf: 'True / false', fill: 'Fill the blank', match: 'Match', assertion: 'Assertion–reason', numeric: 'Numeric', short: 'Short answer', long: 'Long answer', code: 'Code output' };
@@ -271,133 +270,155 @@ export default function StudioPage() {
   const presets = (CATEGORIES.find((c) => c.k === cat) || {}).presets || [];
 
   return (
-    <SiteShell active="studio">
-      <div className="no-print"><PageHeader eyebrow="Studio · beta" title="Question paper generator" lede="Any subject, any structure. Build sections, generate a paper with an answer key, take it interactively to check your answers, or print and save as PDF." /></div>
-      <section className="spread" style={{ paddingBottom: 70 }}>
-        <div className="glass glass-iris-border no-print" style={{ padding: '20px 22px', borderRadius: 'var(--r-xl)' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12 }}>{CATEGORIES.map((c) => <button key={c.k} type="button" onClick={() => setCat(c.k)} className="chip" style={{ cursor: 'pointer', fontSize: 12.5, background: cat === c.k ? 'var(--glass-2)' : 'transparent', color: cat === c.k ? 'var(--text)' : 'var(--text-3)', borderColor: cat === c.k ? 'var(--violet)' : 'var(--stroke-2)' }}>{c.label}</button>)}</div>
-          {presets.length > 0 && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12 }}>{presets.map((p) => <button key={p.label} type="button" onClick={() => applyPreset(p)} className="chip" style={{ cursor: 'pointer', fontSize: 12 }} data-testid="preset">{p.label}</button>)}</div>}
-          {docs.length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 12, color: 'var(--text-3)' }}>Source</span>
-              <select value={sourceDocId} onChange={(e) => setSourceDocId(Number(e.target.value))} style={{ ...ctrl, minWidth: 240 }} data-testid="source-select">
-                <option value={0}>From scratch (topic only)</option>
-                {docs.map((d) => <option key={d.id} value={d.id}>From: {d.filename}{d.pageCount ? ' (' + d.pageCount + ' pp)' : ''}</option>)}
-              </select>
-              {sourceDocId > 0 && <span style={{ fontSize: 11.5, color: 'var(--violet-2)' }}>questions grounded in this document, with page citations</span>}
+    <div id="studio-shell" style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <header className="no-print" style={{ padding: '11px 20px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid var(--stroke-1)', background: 'rgba(5,6,20,0.85)', backdropFilter: 'blur(20px) saturate(180%)', flexShrink: 0, zIndex: 10 }}>
+        <a href="/" className="brand" style={{ fontSize: 14, display: 'inline-flex', alignItems: 'center' }}><span className="brand-mark" style={{ width: 22, height: 22, fontSize: 11 }}>{'◇'}</span>chatwithpdfai<span className="domain">.com</span></a>
+        <span style={{ fontSize: 13, color: 'var(--text-2)', fontWeight: 500 }}>Studio</span>
+        <span className="pill" style={{ fontSize: 9.5, padding: '2px 8px', letterSpacing: '0.08em' }}>BETA</span>
+        <div style={{ flex: 1 }} />
+        {credits != null && <span className="mono" style={{ fontSize: 12, color: 'var(--text-3)' }}>{'◆'} {credits.toLocaleString('en-IN')} CR <a href="/buy" style={{ color: 'var(--violet-2)' }}>+ Buy</a></span>}
+      </header>
+
+      <div className="studio-body" style={{ display: 'flex', flex: 1, minHeight: 0 }}>
+        <aside className="no-print studio-aside" style={{ width: 248, flexShrink: 0, borderRight: '1px solid var(--stroke-1)', background: 'rgba(5,6,20,0.6)', backdropFilter: 'blur(20px) saturate(180%)', display: 'flex', flexDirection: 'column', overflowY: 'auto', padding: '14px 12px' }}>
+          <button type="button" onClick={() => { setPaper(null); setUsed(null); setNote(''); setView('paper'); setEditAns(false); }} className="btn btn-iris btn-sm" data-testid="new-paper" style={{ width: '100%', marginBottom: 16 }}>+ New paper</button>
+          <div className="eyebrow" style={{ marginBottom: 8 }}>My library{library.length ? ' (' + library.length + ')' : ''}</div>
+          {library.length === 0 ? <div style={{ fontSize: 11.5, color: 'var(--text-4)', marginBottom: 18 }}>Saved papers appear here.</div> : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 18 }}>
+              {library.map((lp) => (
+                <div key={lp.id} className="glass" style={{ padding: '8px 10px', borderRadius: 'var(--r)' }} data-testid="lib-row">
+                  <div style={{ fontSize: 12, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lp.title}</div>
+                  <div className="mono" style={{ fontSize: 9.5, color: 'var(--text-4)', margin: '2px 0 5px' }}>{lp.numQuestions} Qs{lp.examStyle ? ' · ' + lp.examStyle : ''}</div>
+                  <div style={{ display: 'flex', gap: 5 }}>
+                    <button onClick={() => openPaper(lp.id)} className="btn btn-glass btn-sm" style={{ fontSize: 10.5, padding: '3px 9px' }} data-testid="lib-open">Open</button>
+                    <button onClick={() => delPaper(lp.id)} className="btn btn-glass btn-sm" style={{ fontSize: 10.5, padding: '3px 8px' }} aria-label="Delete saved paper">{'✕'}</button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
-          <textarea value={topic} onChange={(e) => setTopic(e.target.value)} rows={2} placeholder="Describe the topic or syllabus — e.g. Core Java: OOP, collections, exceptions" className="input" data-testid="topic" style={{ width: '100%', resize: 'vertical', minHeight: 52, fontFamily: 'inherit', padding: '10px 13px' }} />
-          <div style={{ display: 'flex', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
-            <input value={institution} onChange={(e) => setInstitution(e.target.value)} placeholder="Institution / exam name (optional)" className="input" style={{ flex: 1, minWidth: 220, fontSize: 12.5, padding: '8px 12px' }} />
-            <input value={instructions} onChange={(e) => setInstructions(e.target.value)} placeholder="Instructions (optional)" className="input" style={{ flex: 1, minWidth: 220, fontSize: 12.5, padding: '8px 12px' }} />
-          </div>
-          <div className="eyebrow" style={{ margin: '16px 0 8px' }}>Sections — {totalQ} questions · {totalMarks} marks</div>
-          {sections.map((s, i) => (
-            <div key={i} style={{ display: 'flex', gap: 7, alignItems: 'center', marginBottom: 7, flexWrap: 'wrap' }} data-testid="section-row">
-              <input value={s.title} onChange={(e) => setSec(i, { title: e.target.value })} placeholder="Section title" className="input" style={{ flex: 1, minWidth: 140, fontSize: 12.5, padding: '7px 10px' }} />
-              <select value={s.type} onChange={(e) => setSec(i, { type: e.target.value })} style={ctrl}>{ALL_TYPES.map((t) => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}</select>
-              <label style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Qs <input type="number" min={1} max={30} value={s.count} onChange={(e) => setSec(i, { count: e.target.value })} style={{ ...ctrl, width: 54 }} /></label>
-              <label style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Marks <input type="number" min={1} max={20} value={s.marks} onChange={(e) => setSec(i, { marks: e.target.value })} style={{ ...ctrl, width: 50 }} /></label>
-              <button type="button" onClick={() => delSec(i)} className="btn btn-glass btn-sm" style={{ padding: '5px 9px' }} aria-label="Remove section">✕</button>
-            </div>
-          ))}
-          <button type="button" onClick={addSec} className="btn btn-glass btn-sm" data-testid="add-section" style={{ marginTop: 2 }}>+ Add section</button>
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginTop: 16 }}>
-            <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Difficulty<select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} style={ctrl}><option value="mixed">Mixed</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></label>
-            <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Level<select value={level} onChange={(e) => setLevel(e.target.value)} style={ctrl}><option value="">Any</option><option value="Beginner">Beginner</option><option value="School">School</option><option value="College">College</option><option value="Professional">Professional</option><option value="Expert">Expert</option></select></label>
-            <label style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}><input type="checkbox" checked={includeKey} onChange={(e) => setIncludeKey(e.target.checked)} /> Include answer key</label>
-            <label style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }} title="A second AI pass re-checks the answer key (uses a little extra credit)"><input type="checkbox" checked={verify} onChange={(e) => setVerify(e.target.checked)} /> Verify answers</label>
-            <div style={{ flex: 1 }}></div>
-            {credits != null && <span className="mono" style={{ fontSize: 11.5, color: 'var(--text-3)' }}>◆ {credits.toLocaleString('en-IN')} CR <a href="/buy" style={{ color: 'var(--violet-2)' }}>+ Buy</a></span>}
-            <button onClick={generate} disabled={busy} className={busy ? 'btn btn-glass' : 'btn btn-iris'} data-testid="gen-paper">{busy ? 'Generating…' : 'Generate paper →'}</button>
-          </div>
-          {note && <div style={{ marginTop: 12, fontSize: 13, color: '#ffb4b4' }}>{note} {note.includes('credits') && <a href="/buy" style={{ color: 'var(--violet-2)' }}>Buy credits →</a>}</div>}
-          <div className="mono" style={{ marginTop: 12, fontSize: 10.5, color: 'var(--text-4)', letterSpacing: '0.06em' }}>Answers are AI-generated — spot-check before using in a real exam.</div>
-        </div>
-
-        {library.length > 0 && (
-          <div className="no-print" style={{ marginTop: 16 }}>
-            <div className="eyebrow" style={{ marginBottom: 8 }}>My library ({library.length})</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8 }}>
-              {library.map((lp) => (
-                <div key={lp.id} className="glass" style={{ padding: '10px 12px', borderRadius: 'var(--r)' }} data-testid="lib-row">
-                  <div style={{ fontSize: 12.5, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lp.title}</div>
-                  <div className="mono" style={{ fontSize: 10, color: 'var(--text-4)', margin: '3px 0 6px' }}>{lp.numQuestions} Qs{lp.examStyle ? ' · ' + lp.examStyle : ''}</div>
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    <button onClick={() => openPaper(lp.id)} className="btn btn-glass btn-sm" style={{ fontSize: 11, padding: '3px 10px' }} data-testid="lib-open">Open</button>
-                    <button onClick={() => delPaper(lp.id)} className="btn btn-glass btn-sm" style={{ fontSize: 11, padding: '3px 9px' }} aria-label="Delete saved paper">✕</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {shares.length > 0 && (
-          <div className="no-print" style={{ marginTop: 16 }}>
-            <div className="eyebrow" style={{ marginBottom: 8 }}>Shared tests ({shares.length})</div>
-            <div style={{ display: 'grid', gap: 7 }}>
+          <div className="eyebrow" style={{ marginBottom: 8 }}>Shared tests{shares.length ? ' (' + shares.length + ')' : ''}</div>
+          {shares.length === 0 ? <div style={{ fontSize: 11.5, color: 'var(--text-4)' }}>Share a paper as a test to see it here.</div> : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {shares.map((sh) => (
-                <div key={sh.id} className="glass" style={{ padding: '9px 12px', borderRadius: 'var(--r)', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }} data-testid="share-row">
-                  <span style={{ fontSize: 12.5, fontWeight: 500, flex: 1, minWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sh.title}</span>
-                  <a href={'/t/' + sh.token} target="_blank" rel="noreferrer" className="mono" style={{ fontSize: 11, color: 'var(--violet-2)' }}>open</a>
-                  <span className="mono" style={{ fontSize: 10.5, color: 'var(--text-3)' }}>{sh.attempts} attempts{sh.attempts ? ' \u00b7 avg ' + sh.avgPct + '%' : ''}</span>
-                  {sh.attempts > 0 && <button onClick={() => viewAttempts(sh.id)} className="btn btn-glass btn-sm" style={{ fontSize: 11, padding: '3px 9px' }} data-testid="view-attempts">{attemptsFor === sh.id ? 'Hide' : 'View'} attempts</button>}<button onClick={() => { if (navigator.clipboard) navigator.clipboard.writeText(window.location.origin + '/t/' + sh.token); }} className="btn btn-glass btn-sm" style={{ fontSize: 11, padding: '3px 9px' }}>Copy link</button>
-                  <button onClick={() => delShare(sh.id)} className="btn btn-glass btn-sm" style={{ fontSize: 11, padding: '3px 9px' }} aria-label="Delete shared test">✕</button>{attemptsFor === sh.id && (<div style={{ flexBasis: '100%', width: '100%', marginTop: 6, borderTop: '1px solid var(--stroke-1)', paddingTop: 6 }}>{attemptList.length === 0 ? <div style={{ fontSize: 12, color: 'var(--text-3)' }}>No attempts yet.</div> : attemptList.map((a) => <div key={a.id} style={{ display: 'flex', gap: 10, fontSize: 12, padding: '3px 0' }}><span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name || 'Anonymous'}</span><span style={{ fontWeight: 600 }}>{a.score}/{a.total}{a.total ? ' (' + Math.round(100 * a.score / a.total) + '%)' : ''}</span><span className="mono" style={{ color: 'var(--text-4)' }}>{new Date(a.createdAt).toLocaleDateString('en-IN')}</span></div>)}</div>)}
+                <div key={sh.id} className="glass" style={{ padding: '8px 10px', borderRadius: 'var(--r)' }} data-testid="share-row">
+                  <div style={{ fontSize: 12, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sh.title}</div>
+                  <div className="mono" style={{ fontSize: 9.5, color: 'var(--text-4)', margin: '2px 0 5px' }}>{sh.attempts} attempts{sh.attempts ? ' · avg ' + sh.avgPct + '%' : ''}</div>
+                  <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                    <a href={'/t/' + sh.token} target="_blank" rel="noreferrer" className="btn btn-glass btn-sm" style={{ fontSize: 10.5, padding: '3px 9px' }}>Open</a>
+                    <button onClick={() => { if (navigator.clipboard) navigator.clipboard.writeText(window.location.origin + '/t/' + sh.token); }} className="btn btn-glass btn-sm" style={{ fontSize: 10.5, padding: '3px 8px' }}>Copy</button>
+                    {sh.attempts > 0 && <button onClick={() => viewAttempts(sh.id)} className="btn btn-glass btn-sm" style={{ fontSize: 10.5, padding: '3px 8px' }} data-testid="view-attempts">{attemptsFor === sh.id ? 'Hide' : 'Scores'}</button>}
+                    <button onClick={() => delShare(sh.id)} className="btn btn-glass btn-sm" style={{ fontSize: 10.5, padding: '3px 8px' }} aria-label="Delete shared test">{'✕'}</button>
+                  </div>
+                  {attemptsFor === sh.id && (<div style={{ marginTop: 6, borderTop: '1px solid var(--stroke-1)', paddingTop: 6 }}>{attemptList.length === 0 ? <div style={{ fontSize: 11, color: 'var(--text-3)' }}>No attempts yet.</div> : attemptList.map((a) => <div key={a.id} style={{ display: 'flex', gap: 8, fontSize: 11, padding: '2px 0' }}><span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name || 'Anonymous'}</span><span style={{ fontWeight: 600 }}>{a.score}/{a.total}</span></div>)}</div>)}
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </aside>
 
-        {paper && (
-          <div id="result-top">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '22px 0 12px', flexWrap: 'wrap' }} className="no-print">
-              <div style={{ display: 'flex', gap: 4, background: 'var(--glass-1)', borderRadius: 'var(--r)', padding: 3 }}>
-                <button onClick={() => setView('paper')} className={view === 'paper' ? 'btn btn-iris btn-sm' : 'btn btn-glass btn-sm'} data-testid="view-paper">Paper</button>
-                <button onClick={() => { setView('practice'); setChecked(false); }} className={view === 'practice' ? 'btn btn-iris btn-sm' : 'btn btn-glass btn-sm'} data-testid="view-practice">Practice</button>
-              </div>
-              {view === 'paper' && <><label style={{ fontSize: 11.5, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 5 }}>Layout<select value={paper.layout || layout} onChange={(e) => { const v = e.target.value; setLayout(v); setPaper((pp) => pp ? { ...pp, layout: v } : pp); }} style={{ padding: '5px 8px', borderRadius: 'var(--r)', background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', color: 'var(--text)', fontSize: 12 }} data-testid="layout-select"><option value="official">Official</option><option value="clean">Clean</option><option value="compact">Compact</option></select></label><button onClick={() => window.print()} className="btn btn-iris" data-testid="save-pdf">Save as PDF / Print</button><button onClick={generate} className="btn btn-glass">Regenerate</button><button onClick={savePaper} className="btn btn-glass" data-testid="save-library">+ Save to library</button><button onClick={shareTest} className="btn btn-glass" data-testid="share-test">Share as test</button><button onClick={() => setEditAns((v) => !v)} className={editAns ? 'btn btn-iris' : 'btn btn-glass'} data-testid="edit-answers">{editAns ? 'Done editing' : 'Edit answers'}</button><span className="mono" style={{ fontSize: 11.5, color: 'var(--text-3)' }}>{includeKey ? 'teacher copy' : 'student copy'}{used != null ? ' · used ' + used + ' CR' : ''}</span>{paper.verified && <span className="mono" style={{ fontSize: 11, color: 'var(--green)' }} data-testid="verified">✓ answers verified{paper.fixes ? ' (' + paper.fixes + ' corrected)' : ''}</span>}<span style={{ fontSize: 11.5, color: 'var(--text-3)', marginLeft: 4 }}>Export:</span><button onClick={() => downloadText(slug(paper.title) + '.xml', toMoodleXML(paper), 'application/xml')} className="btn btn-glass btn-sm" data-testid="export-xml">Moodle XML</button><button onClick={() => downloadText(slug(paper.title) + '.gift.txt', toGIFT(paper))} className="btn btn-glass btn-sm" data-testid="export-gift">GIFT</button><button onClick={() => downloadText(slug(paper.title) + '.csv', toCSV(paper), 'text/csv')} className="btn btn-glass btn-sm" data-testid="export-csv">CSV</button>{savedMsg && <span className="mono" style={{ fontSize: 11, color: 'var(--green)' }} data-testid="saved-msg">{savedMsg}</span>}{shareMsg && <span className="mono" style={{ fontSize: 11, color: 'var(--violet-2)' }} data-testid="share-msg">{shareMsg}</span>}</>}
-              {view === 'practice' && (checked
-                ? <><span style={{ fontSize: 15, fontWeight: 600 }} data-testid="score">Score {correctN} / {autoTotal}{autoTotal ? ' (' + Math.round(100 * correctN / autoTotal) + '%)' : ''}</span>{writtenN > 0 && <span style={{ fontSize: 12, color: 'var(--text-3)' }}>+ {writtenN} written to self-check</span>}<button onClick={() => { setChecked(false); setAnswers({}); }} className="btn btn-glass btn-sm">Try again</button></>
-                : <button onClick={() => setChecked(true)} className="btn btn-iris" data-testid="check-answers">Check answers</button>)}
-            </div>
-
-            {editAns && (
-              <div className="no-print glass" style={{ padding: '16px 18px', borderRadius: 'var(--r-lg)', maxWidth: 820, margin: '0 auto 14px' }}>
-                <div className="eyebrow" style={{ marginBottom: 4 }}>Edit answer key</div>
-                <div style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 12 }}>AI answers can occasionally be wrong — fix any here before you print, save or share. Changes apply everywhere.</div>
-                {(() => { let n = 0; return paper.sections.flatMap((sec) => sec.questions.map((q) => { const gi = n++; return (
-                  <div key={gi} style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 8, fontSize: 13 }}>
-                    <span style={{ fontWeight: 600, color: 'var(--violet-2)', minWidth: 24 }}>{gi + 1}.</span>
-                    <span style={{ flex: 1, minWidth: 0, color: 'var(--text-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{String(q.q || q.assertion || '').replace(/\n/g, ' ').slice(0, 64)}</span>
-                    <EditAnswerControl q={q} gi={gi} onPatch={patchQ} />
-                  </div>
-                ); })); })()}
+        <div className="studio-main" style={{ display: 'flex', flex: 1, minWidth: 0 }}>
+          <section className="no-print studio-build" style={{ width: 472, flexShrink: 0, borderRight: '1px solid var(--stroke-1)', overflowY: 'auto', padding: '18px 20px', background: 'rgba(5,6,20,0.35)' }}>
+            <div className="eyebrow" style={{ marginBottom: 10 }}>Build</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12 }}>{CATEGORIES.map((c) => <button key={c.k} type="button" onClick={() => setCat(c.k)} className="chip" style={{ cursor: 'pointer', fontSize: 12, background: cat === c.k ? 'var(--glass-2)' : 'transparent', color: cat === c.k ? 'var(--text)' : 'var(--text-3)', borderColor: cat === c.k ? 'var(--violet)' : 'var(--stroke-2)' }}>{c.label}</button>)}</div>
+            {presets.length > 0 && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12 }}>{presets.map((p) => <button key={p.label} type="button" onClick={() => applyPreset(p)} className="chip" style={{ cursor: 'pointer', fontSize: 12 }} data-testid="preset">{p.label}</button>)}</div>}
+            {docs.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 12, color: 'var(--text-3)' }}>Source</span>
+                <select value={sourceDocId} onChange={(e) => setSourceDocId(Number(e.target.value))} style={{ ...ctrl, minWidth: 200 }} data-testid="source-select">
+                  <option value={0}>From scratch (topic only)</option>
+                  {docs.map((d) => <option key={d.id} value={d.id}>From: {d.filename}{d.pageCount ? ' (' + d.pageCount + ' pp)' : ''}</option>)}
+                </select>
               </div>
             )}
-            {view === 'paper' ? (
-              <div id="paper-print" style={{ background: '#fff', color: '#111', borderRadius: 'var(--r-lg)', padding: '40px 44px', maxWidth: 820, margin: '0 auto', border: '1px solid var(--stroke-2)' }}>
-                <PaperView paper={paper} layout={paper.layout || layout} includeKey={includeKey} />
+            <textarea value={topic} onChange={(e) => setTopic(e.target.value)} rows={2} placeholder="Describe the topic or syllabus &mdash; e.g. Core Java: OOP, collections, exceptions" className="input" data-testid="topic" style={{ width: '100%', resize: 'vertical', minHeight: 60, fontFamily: 'inherit', padding: '10px 13px' }} />
+            <div style={{ display: 'flex', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
+              <input value={institution} onChange={(e) => setInstitution(e.target.value)} placeholder="Institution / exam name (optional)" className="input" style={{ flex: 1, minWidth: 170, fontSize: 12.5, padding: '8px 12px' }} />
+              <input value={instructions} onChange={(e) => setInstructions(e.target.value)} placeholder="Instructions (optional)" className="input" style={{ flex: 1, minWidth: 170, fontSize: 12.5, padding: '8px 12px' }} />
+            </div>
+            <div className="eyebrow" style={{ margin: '16px 0 8px' }}>Sections &mdash; {totalQ} questions {'·'} {totalMarks} marks</div>
+            {sections.map((s, i) => (
+              <div key={i} style={{ display: 'flex', gap: 7, alignItems: 'center', marginBottom: 7, flexWrap: 'wrap' }} data-testid="section-row">
+                <input value={s.title} onChange={(e) => setSec(i, { title: e.target.value })} placeholder="Section title" className="input" style={{ flex: 1, minWidth: 120, fontSize: 12.5, padding: '7px 10px' }} />
+                <select value={s.type} onChange={(e) => setSec(i, { type: e.target.value })} style={ctrl}>{ALL_TYPES.map((t) => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}</select>
+                <label style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Qs <input type="number" min={1} max={30} value={s.count} onChange={(e) => setSec(i, { count: e.target.value })} style={{ ...ctrl, width: 50 }} /></label>
+                <label style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Marks <input type="number" min={1} max={20} value={s.marks} onChange={(e) => setSec(i, { marks: e.target.value })} style={{ ...ctrl, width: 46 }} /></label>
+                <button type="button" onClick={() => delSec(i)} className="btn btn-glass btn-sm" style={{ padding: '5px 9px' }} aria-label="Remove section">{'✕'}</button>
+              </div>
+            ))}
+            <button type="button" onClick={addSec} className="btn btn-glass btn-sm" data-testid="add-section" style={{ marginTop: 2 }}>+ Add section</button>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginTop: 16 }}>
+              <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Difficulty<select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} style={ctrl}><option value="mixed">Mixed</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></label>
+              <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Level<select value={level} onChange={(e) => setLevel(e.target.value)} style={ctrl}><option value="">Any</option><option value="Beginner">Beginner</option><option value="School">School</option><option value="College">College</option><option value="Professional">Professional</option><option value="Expert">Expert</option></select></label>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, marginTop: 12 }}>
+              <label style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}><input type="checkbox" checked={includeKey} onChange={(e) => setIncludeKey(e.target.checked)} /> Include answer key</label>
+              <label style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }} title="A second AI pass re-checks the answer key"><input type="checkbox" checked={verify} onChange={(e) => setVerify(e.target.checked)} /> Verify answers</label>
+            </div>
+            <button onClick={generate} disabled={busy} className={busy ? 'btn btn-glass' : 'btn btn-iris'} data-testid="gen-paper" style={{ width: '100%', marginTop: 16 }}>{busy ? 'Generating…' : 'Generate paper →'}</button>
+            {note && <div style={{ marginTop: 12, fontSize: 13, color: '#ffb4b4' }}>{note} {note.includes('credits') && <a href="/buy" style={{ color: 'var(--violet-2)' }}>Buy credits →</a>}</div>}
+            <div className="mono" style={{ marginTop: 12, fontSize: 10, color: 'var(--text-4)', letterSpacing: '0.06em' }}>Answers are AI-generated &mdash; spot-check before using in a real exam.</div>
+          </section>
+
+          <section className="studio-preview" style={{ flex: 1, minWidth: 0, overflowY: 'auto', padding: '18px 20px', background: 'rgba(5,6,20,0.5)' }}>
+            {!paper ? (
+              <div className="no-print" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: 'var(--text-4)' }}>
+                <div style={{ maxWidth: 360 }}>
+                  <div style={{ width: 60, height: 60, margin: '0 auto 16px', borderRadius: 16, background: 'var(--glass-2)', border: '1px solid var(--stroke-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, color: 'var(--violet-2)' }}>{'✎'}</div>
+                  <div style={{ fontSize: 15, color: 'var(--text-2)', marginBottom: 4 }}>{busy ? 'Generating your paper…' : 'Your paper appears here'}</div>
+                  <div style={{ fontSize: 12.5 }}>{busy ? 'This can take a few seconds.' : 'Build sections on the left, then Generate.'}</div>
+                </div>
               </div>
             ) : (
-              <div className="glass" style={{ padding: '24px 26px', borderRadius: 'var(--r-lg)', maxWidth: 760, margin: '0 auto' }}>
-                <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>{paper.title}</div>
-                <div style={{ fontSize: 12.5, color: 'var(--text-3)', marginBottom: 18 }}>Answer the questions, then hit Check answers. Auto-graded: {autoTotal}{writtenN ? ' · ' + writtenN + ' written (self-check)' : ''}.</div>
-                {flat.map((q, gi) => (
-                  <div key={gi} style={{ marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid var(--stroke-1)' }} data-testid="practice-q">
-                    <div style={{ display: 'flex', gap: 8, fontSize: 14, lineHeight: 1.5 }}><span style={{ fontWeight: 600, color: 'var(--violet-2)', flexShrink: 0 }}>{gi + 1}.</span><div style={{ flex: 1 }}><PromptStem q={q} /></div></div>
-                    <div style={{ marginLeft: 22 }}><PracticeInput q={q} ua={answers[gi]} checked={checked} onAns={(v) => setAnswers((a) => ({ ...a, [gi]: v }))} />{checked && <Feedback q={q} ua={answers[gi]} />}</div>
+              <div id="result-top">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }} className="no-print">
+                  <div style={{ display: 'flex', gap: 4, background: 'var(--glass-1)', borderRadius: 'var(--r)', padding: 3 }}>
+                    <button onClick={() => setView('paper')} className={view === 'paper' ? 'btn btn-iris btn-sm' : 'btn btn-glass btn-sm'} data-testid="view-paper">Paper</button>
+                    <button onClick={() => { setView('practice'); setChecked(false); }} className={view === 'practice' ? 'btn btn-iris btn-sm' : 'btn btn-glass btn-sm'} data-testid="view-practice">Practice</button>
                   </div>
-                ))}
-                {!checked && <button onClick={() => setChecked(true)} className="btn btn-iris" style={{ marginTop: 4 }}>Check answers</button>}
+                  {view === 'paper' && <><label style={{ fontSize: 11.5, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 5 }}>Layout<select value={paper.layout || layout} onChange={(e) => { const v = e.target.value; setLayout(v); setPaper((pp) => pp ? { ...pp, layout: v } : pp); }} style={{ padding: '5px 8px', borderRadius: 'var(--r)', background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', color: 'var(--text)', fontSize: 12 }} data-testid="layout-select"><option value="official">Official</option><option value="clean">Clean</option><option value="compact">Compact</option></select></label><button onClick={() => window.print()} className="btn btn-iris" data-testid="save-pdf">Save as PDF / Print</button><button onClick={generate} className="btn btn-glass">Regenerate</button><button onClick={savePaper} className="btn btn-glass" data-testid="save-library">+ Save to library</button><button onClick={shareTest} className="btn btn-glass" data-testid="share-test">Share as test</button><button onClick={() => setEditAns((v) => !v)} className={editAns ? 'btn btn-iris' : 'btn btn-glass'} data-testid="edit-answers">{editAns ? 'Done editing' : 'Edit answers'}</button><span className="mono" style={{ fontSize: 11.5, color: 'var(--text-3)' }}>{includeKey ? 'teacher copy' : 'student copy'}{used != null ? ' · used ' + used + ' CR' : ''}</span>{paper.verified && <span className="mono" style={{ fontSize: 11, color: 'var(--green)' }} data-testid="verified">{'✓'} answers verified{paper.fixes ? ' (' + paper.fixes + ' corrected)' : ''}</span>}<span style={{ fontSize: 11.5, color: 'var(--text-3)', marginLeft: 4 }}>Export:</span><button onClick={() => downloadText(slug(paper.title) + '.xml', toMoodleXML(paper), 'application/xml')} className="btn btn-glass btn-sm" data-testid="export-xml">Moodle XML</button><button onClick={() => downloadText(slug(paper.title) + '.gift.txt', toGIFT(paper))} className="btn btn-glass btn-sm" data-testid="export-gift">GIFT</button><button onClick={() => downloadText(slug(paper.title) + '.csv', toCSV(paper), 'text/csv')} className="btn btn-glass btn-sm" data-testid="export-csv">CSV</button>{savedMsg && <span className="mono" style={{ fontSize: 11, color: 'var(--green)' }} data-testid="saved-msg">{savedMsg}</span>}{shareMsg && <span className="mono" style={{ fontSize: 11, color: 'var(--violet-2)' }} data-testid="share-msg">{shareMsg}</span>}</>}
+                  {view === 'practice' && (checked
+                    ? <><span style={{ fontSize: 15, fontWeight: 600 }} data-testid="score">Score {correctN} / {autoTotal}{autoTotal ? ' (' + Math.round(100 * correctN / autoTotal) + '%)' : ''}</span>{writtenN > 0 && <span style={{ fontSize: 12, color: 'var(--text-3)' }}>+ {writtenN} written to self-check</span>}<button onClick={() => { setChecked(false); setAnswers({}); }} className="btn btn-glass btn-sm">Try again</button></>
+                    : <button onClick={() => setChecked(true)} className="btn btn-iris" data-testid="check-answers">Check answers</button>)}
+                </div>
+
+                {editAns && (
+                  <div className="no-print glass" style={{ padding: '16px 18px', borderRadius: 'var(--r-lg)', maxWidth: 820, margin: '0 auto 14px' }}>
+                    <div className="eyebrow" style={{ marginBottom: 4 }}>Edit answer key</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 12 }}>AI answers can occasionally be wrong &mdash; fix any here before you print, save or share. Changes apply everywhere.</div>
+                    {(() => { let n = 0; return paper.sections.flatMap((sec) => sec.questions.map((q) => { const gi = n++; return (
+                      <div key={gi} style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 8, fontSize: 13 }}>
+                        <span style={{ fontWeight: 600, color: 'var(--violet-2)', minWidth: 24 }}>{gi + 1}.</span>
+                        <span style={{ flex: 1, minWidth: 0, color: 'var(--text-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{String(q.q || q.assertion || '').replace(/\n/g, ' ').slice(0, 64)}</span>
+                        <EditAnswerControl q={q} gi={gi} onPatch={patchQ} />
+                      </div>
+                    ); })); })()}
+                  </div>
+                )}
+                {view === 'paper' ? (
+                  <div id="paper-print" style={{ background: '#fff', color: '#111', borderRadius: 'var(--r-lg)', padding: '40px 44px', maxWidth: 820, margin: '0 auto', border: '1px solid var(--stroke-2)' }}>
+                    <PaperView paper={paper} layout={paper.layout || layout} includeKey={includeKey} />
+                  </div>
+                ) : (
+                  <div className="glass" style={{ padding: '24px 26px', borderRadius: 'var(--r-lg)', maxWidth: 760, margin: '0 auto' }}>
+                    <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>{paper.title}</div>
+                    <div style={{ fontSize: 12.5, color: 'var(--text-3)', marginBottom: 18 }}>Answer the questions, then hit Check answers. Auto-graded: {autoTotal}{writtenN ? ' · ' + writtenN + ' written (self-check)' : ''}.</div>
+                    {flat.map((q, gi) => (
+                      <div key={gi} style={{ marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid var(--stroke-1)' }} data-testid="practice-q">
+                        <div style={{ display: 'flex', gap: 8, fontSize: 14, lineHeight: 1.5 }}><span style={{ fontWeight: 600, color: 'var(--violet-2)', flexShrink: 0 }}>{gi + 1}.</span><div style={{ flex: 1 }}><PromptStem q={q} /></div></div>
+                        <div style={{ marginLeft: 22 }}><PracticeInput q={q} ua={answers[gi]} checked={checked} onAns={(v) => setAnswers((a) => ({ ...a, [gi]: v }))} />{checked && <Feedback q={q} ua={answers[gi]} />}</div>
+                      </div>
+                    ))}
+                    {!checked && <button onClick={() => setChecked(true)} className="btn btn-iris" style={{ marginTop: 4 }}>Check answers</button>}
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        )}
-      </section>
-      <style dangerouslySetInnerHTML={{ __html: `@media print { .no-print { display: none !important; } .masthead, footer { display: none !important; } html, body, main { padding-top: 0 !important; margin-top: 0 !important; background: #fff !important; } #paper-print { border: none !important; border-radius: 0 !important; box-shadow: none !important; max-width: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; } #paper-print .q-block, #paper-print .key-item { break-inside: avoid !important; page-break-inside: avoid !important; } #paper-print .section-head { break-after: avoid !important; page-break-after: avoid !important; } #paper-print .pagebreak { page-break-before: always !important; break-before: page !important; } }` }} />
-    </SiteShell>
+          </section>
+        </div>
+      </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `@media print { .no-print { display: none !important; } #studio-shell, .studio-body, .studio-main, .studio-preview, #result-top { height: auto !important; max-height: none !important; overflow: visible !important; display: block !important; } html, body { height: auto !important; overflow: visible !important; background: #fff !important; } #paper-print { border: none !important; border-radius: 0 !important; box-shadow: none !important; max-width: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; } #paper-print .q-block, #paper-print .key-item { break-inside: avoid !important; page-break-inside: avoid !important; } #paper-print .section-head { break-after: avoid !important; page-break-after: avoid !important; } #paper-print .pagebreak { page-break-before: always !important; break-before: page !important; } } @media (max-width: 880px) { #studio-shell { height: auto !important; overflow: visible !important; } .studio-body, .studio-main { flex-direction: column !important; } .studio-aside, .studio-build, .studio-preview { width: 100% !important; flex-shrink: 1 !important; overflow: visible !important; border-right: none !important; border-bottom: 1px solid var(--stroke-1) !important; } }` }} />
+    </div>
   );
 }
