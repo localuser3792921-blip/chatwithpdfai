@@ -1,4 +1,5 @@
 'use client';
+import AppNav from '../_components/AppNav';
 import { useState, useEffect, useRef } from 'react';
 
 async function jget(url) { const r = await fetch(url); const j = await r.json().catch(() => ({})); return { ok: r.ok, status: r.status, j }; }
@@ -352,7 +353,7 @@ export default function WorkspacePage() {
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <Header credits={credits} docTitle={active?.filename?.slice(0, 30)} onUpload={() => setShowUpload(true)} onExport={() => exportConversation(active, messages)} />
+      <AppNav active="chat" credits={credits} actions={<><button onClick={() => exportConversation(active, messages)} className="btn btn-glass btn-sm">Export ↓</button><button onClick={() => setShowUpload(true)} className="btn btn-iris btn-sm" data-testid="upload-open">+ Upload PDF</button></>} />
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         <Sidebar docs={docs} activeId={activeId} onPick={setActiveId} onNew={() => { setActiveId(null); setMessages([]); }} onUpload={() => setShowUpload(true)} />
         {active ? (

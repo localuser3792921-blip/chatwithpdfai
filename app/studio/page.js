@@ -1,4 +1,5 @@
 'use client';
+import AppNav from '../_components/AppNav';
 import { useState, useEffect } from 'react';
 import { toGIFT, toMoodleXML, toCSV, downloadText, slug } from './exporters';
 
@@ -271,13 +272,7 @@ export default function StudioPage() {
 
   return (
     <div id="studio-shell" style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <header className="no-print" style={{ padding: '11px 20px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid var(--stroke-1)', background: 'rgba(5,6,20,0.85)', backdropFilter: 'blur(20px) saturate(180%)', flexShrink: 0, zIndex: 10 }}>
-        <a href="/" className="brand" style={{ fontSize: 14, display: 'inline-flex', alignItems: 'center' }}><span className="brand-mark" style={{ width: 22, height: 22, fontSize: 11 }}>{'◇'}</span>chatwithpdfai<span className="domain">.com</span></a>
-        <span style={{ fontSize: 13, color: 'var(--text-2)', fontWeight: 500 }}>Studio</span>
-        <span className="pill" style={{ fontSize: 9.5, padding: '2px 8px', letterSpacing: '0.08em' }}>BETA</span>
-        <div style={{ flex: 1 }} />
-        {credits != null && <span className="mono" style={{ fontSize: 12, color: 'var(--text-3)' }}>{'◆'} {credits.toLocaleString('en-IN')} CR <a href="/buy" style={{ color: 'var(--violet-2)' }}>+ Buy</a></span>}
-      </header>
+      <AppNav active="studio" credits={credits} />
 
       <div className="studio-body" style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         <aside className="no-print studio-aside" style={{ width: 248, flexShrink: 0, borderRight: '1px solid var(--stroke-1)', background: 'rgba(5,6,20,0.6)', backdropFilter: 'blur(20px) saturate(180%)', display: 'flex', flexDirection: 'column', overflowY: 'auto', padding: '14px 12px' }}>

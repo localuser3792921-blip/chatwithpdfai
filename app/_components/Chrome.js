@@ -10,6 +10,8 @@ const NAV = [
 
 export function Masthead({ active }) {
   const [scrolled, setScrolled] = useState(false);
+  const [authed, setAuthed] = useState(false);
+  useEffect(() => { fetch('/api/auth/me').then((r) => setAuthed(r.ok)).catch(() => {}); }, []);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
     window.addEventListener('scroll', onScroll);
@@ -28,8 +30,7 @@ export function Masthead({ active }) {
           ))}
         </nav>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <a href="/signin" className="btn btn-ghost btn-sm">Sign in</a>
-          <a href="/signup" className="btn btn-iris btn-sm">Try free →</a>
+          {authed ? <a href="/home" className="btn btn-iris btn-sm">Go to app →</a> : <><a href="/signin" className="btn btn-ghost btn-sm">Sign in</a><a href="/signup" className="btn btn-iris btn-sm">Try free →</a></>}
         </div>
       </div>
     </header>
