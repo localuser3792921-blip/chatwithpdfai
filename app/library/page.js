@@ -25,36 +25,36 @@ export default function LibraryPage() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <AppNav active="library" credits={credits} />
-      <main style={{ maxWidth: 920, margin: '0 auto', width: '100%', padding: '28px 20px 60px' }}>
+      <main id="main-content" style={{ maxWidth: 920, margin: '0 auto', width: '100%', padding: '28px 20px 60px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
           <h1 style={{ fontSize: 24, fontWeight: 600, margin: 0 }}>Library</h1>
-          <input className="input" placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)} style={{ padding: '8px 12px', fontSize: 13.5, minWidth: 200 }} />
+          <input className="input" aria-label="Search library" placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)} style={{ padding: '8px 12px', fontSize: 13.5, minWidth: 200 }} />
         </div>
         <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap' }}>{TABS.map(([k, l, arr]) => <button key={k} onClick={() => setTab(k)} className={tab === k ? 'btn btn-iris btn-sm' : 'btn btn-glass btn-sm'}>{l}{arr ? ' (' + arr.length + ')' : ''}</button>)}</div>
 
-        {tab === 'docs' && (docs === null ? <div className="mono" style={{ color: 'var(--text-4)', fontSize: 12 }}>LOADING…</div> : (() => {
+        {tab === 'docs' && (docs === null ? <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>{[0, 1, 2, 3].map((i) => <div key={i} className="skel" style={{ height: 92 }} />)}</div> : (() => {
           const list = docs.filter((d) => (d.filename || '').toLowerCase().includes(ql));
           if (!list.length) return empty(q ? 'No matching documents.' : 'No documents yet.', q ? null : '+ Upload your first PDF', '/workspace');
           return <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>{list.map((d) => (
             <a key={d.id} href={`/workspace?doc=${d.id}`} className="glass hover-glow" data-testid="doc-row" style={{ ...card, padding: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}><div style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--glass-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--violet-2)', flexShrink: 0 }}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3v5h5" /><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /></svg></div><span className="pill" style={{ fontSize: 10, padding: '3px 8px', color: d.status === 'ready' ? 'var(--green)' : 'var(--text-3)' }}>{d.status}</span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}><div style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--glass-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--violet-2)', flexShrink: 0 }}><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3v5h5" /><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /></svg></div><span className="pill" style={{ fontSize: 10, padding: '3px 8px', color: d.status === 'ready' ? 'var(--green)' : 'var(--text-3)' }}>{d.status}</span></div>
               <div style={{ fontSize: 14, fontWeight: 600, margin: '12px 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.filename}</div>
               <div className="mono" style={{ fontSize: 10, color: 'var(--text-4)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{d.pageCount ? d.pageCount + ' pp · ' : ''}{fmtSize(d.sizeBytes)}{d.createdAt ? ' · ' + fmtDate(d.createdAt) : ''}</div>
             </a>))}</div>;
         })())}
 
-        {tab === 'papers' && (papers === null ? <div className="mono" style={{ color: 'var(--text-4)', fontSize: 12 }}>LOADING…</div> : (() => {
+        {tab === 'papers' && (papers === null ? <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>{[0, 1, 2, 3].map((i) => <div key={i} className="skel" style={{ height: 92 }} />)}</div> : (() => {
           const list = papers.filter((p) => (p.title || '').toLowerCase().includes(ql));
           if (!list.length) return empty(q ? 'No matching papers.' : 'No saved papers yet.', q ? null : '+ Generate a paper', '/studio');
           return <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>{list.map((p) => (
             <a key={p.id} href={`/studio?paper=${p.id}`} className="glass hover-glow" style={{ ...card, padding: 16 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--glass-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--violet-2)', marginBottom: 12 }}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="12" height="17" rx="2" /><path d="M9 4V3h6v1" /></svg></div>
+              <div style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--glass-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--violet-2)', marginBottom: 12 }}><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="12" height="17" rx="2" /><path d="M9 4V3h6v1" /></svg></div>
               <div style={{ fontSize: 14, fontWeight: 600, margin: '0 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</div>
               <div className="mono" style={{ fontSize: 10, color: 'var(--text-4)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{p.numQuestions} Qs{p.examStyle ? ' · ' + p.examStyle : ''}{p.createdAt ? ' · ' + fmtDate(p.createdAt) : ''}</div>
             </a>))}</div>;
         })())}
 
-        {tab === 'tests' && (shares === null ? <div className="mono" style={{ color: 'var(--text-4)', fontSize: 12 }}>LOADING…</div> : (() => {
+        {tab === 'tests' && (shares === null ? <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>{[0, 1, 2, 3].map((i) => <div key={i} className="skel" style={{ height: 92 }} />)}</div> : (() => {
           const list = shares.filter((s) => (s.title || '').toLowerCase().includes(ql));
           if (!list.length) return empty(q ? 'No matching tests.' : 'No shared tests yet.', q ? null : 'Go to Studio', '/studio');
           return <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>{list.map((s) => (

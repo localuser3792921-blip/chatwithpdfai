@@ -11,9 +11,9 @@ function TakeInput({ q, ua, locked, onA, optPerm }) {
   if (q.type === 'mcq' || q.type === 'code' || q.type === 'assertion') { const order = optPerm || q.options.map((_, i) => i); return <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>{order.map((oi, di) => <div key={oi}>{btn(<span>({LETTER(di)}) {q.options[oi]}</span>, ua === oi, () => onA(oi))}</div>)}</div>; }
   if (q.type === 'tf') return <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>{[true, false].map((v) => <div key={String(v)} style={{ flex: 1 }}>{btn(v ? 'True' : 'False', ua === v, () => onA(v))}</div>)}</div>;
   if (q.type === 'multi') { const order = optPerm || q.options.map((_, i) => i); const arr = Array.isArray(ua) ? ua : []; return <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>{order.map((oi, di) => { const sel = arr.includes(oi); return <div key={oi}>{btn(<span>{sel ? '☑' : '☐'} ({LETTER(di)}) {q.options[oi]}</span>, sel, () => onA(sel ? arr.filter((x) => x !== oi) : [...arr, oi]))}</div>; })}</div>; }
-  if (q.type === 'fill' || q.type === 'numeric') return <input value={ua || ''} disabled={locked} onChange={(e) => onA(e.target.value)} placeholder="Your answer" className="input" style={{ marginTop: 8, maxWidth: 320, fontSize: 13.5, padding: '8px 12px' }} />;
+  if (q.type === 'fill' || q.type === 'numeric') return <input value={ua || ''} disabled={locked} onChange={(e) => onA(e.target.value)} placeholder="Your answer" aria-label="Your answer" className="input" style={{ marginTop: 8, maxWidth: 320, fontSize: 13.5, padding: '8px 12px' }} />;
   if (q.type === 'match') { const arr = Array.isArray(ua) ? ua : []; return <div style={{ marginTop: 8, display: 'grid', gap: 6 }}>{q.lefts.map((l, pi) => <div key={pi} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13.5 }}><span style={{ minWidth: 150 }}>{l}</span><select disabled={locked} value={arr[pi] == null ? '' : arr[pi]} onChange={(e) => { const nx = [...arr]; nx[pi] = Number(e.target.value); onA(nx); }} style={{ padding: '6px 9px', borderRadius: 'var(--r)', background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', color: 'var(--text)', fontSize: 12.5 }}><option value="">{'—'}</option>{q.choices.map((c, ci) => <option key={ci} value={ci}>{LETTER(ci)}) {c}</option>)}</select></div>)}</div>; }
-  return <textarea value={ua || ''} disabled={locked} onChange={(e) => onA(e.target.value)} placeholder="Write your answer" className="input" style={{ marginTop: 8, width: '100%', minHeight: 60, resize: 'vertical', fontFamily: 'inherit', fontSize: 13.5, padding: '9px 12px' }} />;
+  return <textarea value={ua || ''} disabled={locked} onChange={(e) => onA(e.target.value)} placeholder="Write your answer" aria-label="Your answer" className="input" style={{ marginTop: 8, width: '100%', minHeight: 60, resize: 'vertical', fontFamily: 'inherit', fontSize: 13.5, padding: '9px 12px' }} />;
 }
 
 export default function TakeTest({ params }) {
@@ -93,7 +93,7 @@ export default function TakeTest({ params }) {
               <div style={{ fontSize: 12.5, color: 'var(--text-3)' }}>Submitted{name ? ', ' + name : ''}. Review your answers below.</div>
             </div>
           ) : (
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name (optional)" className="input" style={{ marginBottom: 18, maxWidth: 300, fontSize: 13.5, padding: '8px 12px' }} />
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name (optional)" aria-label="Your name" className="input" style={{ marginBottom: 18, maxWidth: 300, fontSize: 13.5, padding: '8px 12px' }} />
           )}
           {qOrder.map((gi, di) => { const q = flat[gi]; const r = resById[gi]; return (
             <div key={gi} style={{ marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid var(--stroke-1)' }}>

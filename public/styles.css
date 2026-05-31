@@ -483,3 +483,6 @@ button { font-family: inherit; }
 /* Native form-control popups render dark (fixes light <select> dropdown lists) */
 select { color-scheme: dark; }
 select option, select optgroup { background-color: #0b0c1f; color: #e8e8f0; }
+
+/* Loading skeleton */
+.skel { background: linear-gradient(90deg, var(--glass-1) 25%, var(--glass-2) 50%, var(--glass-1) 75%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; border-radius: var(--r); display: block; }

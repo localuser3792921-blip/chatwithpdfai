@@ -48,7 +48,7 @@ export default function AccountPage() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <AppNav active="account" credits={credits} />
-      <main style={{ maxWidth: 760, margin: '0 auto', width: '100%', padding: '28px 20px 60px' }}>
+      <main id="main-content" style={{ maxWidth: 760, margin: '0 auto', width: '100%', padding: '28px 20px 60px' }}>
         <h1 style={{ fontSize: 24, fontWeight: 600, margin: '0 0 16px' }}>Account</h1>
         {user && !user.emailVerified && (
           <div style={{ background: 'rgba(255,189,46,0.12)', border: '1px solid rgba(255,189,46,0.4)', borderRadius: 'var(--r)', padding: '12px 16px', marginBottom: 20, fontSize: 13.5, color: '#ffd27a', display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -63,7 +63,7 @@ export default function AccountPage() {
           <div className="eyebrow" style={{ marginBottom: 14 }}>Profile</div>
           <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'block', marginBottom: 6 }}>Display name</label>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14 }}>
-            <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" style={{ flex: 1, fontSize: 13.5, padding: '9px 12px' }} data-testid="name-input" />
+            <input className="input" value={name} onChange={(e) => setName(e.target.value)} aria-label="Display name" placeholder="Your name" style={{ flex: 1, fontSize: 13.5, padding: '9px 12px' }} data-testid="name-input" />
             <button onClick={saveName} className="btn btn-glass" data-testid="save-name">Save</button>
             {nameMsg && <span style={{ fontSize: 12, color: nameMsg === 'Saved.' ? 'var(--green)' : 'var(--text-2)' }}>{nameMsg}</span>}
           </div>
@@ -79,7 +79,7 @@ export default function AccountPage() {
           </div>
           <div style={card}>
             <div className="eyebrow" style={{ marginBottom: 14 }}>Purchases</div>
-            {purchases === null ? <div className="mono" style={{ fontSize: 12, color: 'var(--text-4)' }}>LOADING…</div> : purchases.length === 0 ? <div style={{ fontSize: 13, color: 'var(--text-3)' }}>No purchases yet.</div> : purchases.map((pp) => (
+            {purchases === null ? (<>{[0, 1, 2].map((i) => <div key={i} className="skel" style={{ height: 30, marginBottom: 6 }} />)}</>) : purchases.length === 0 ? <div style={{ fontSize: 13, color: 'var(--text-3)' }}>No purchases yet.</div> : purchases.map((pp) => (
               <div key={pp.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid var(--stroke-1)', fontSize: 13 }}>
                 <span style={{ flex: 1 }}>{fmt(pp.at)} · {pp.credits} credits</span>
                 <span className="mono" style={{ color: 'var(--text-2)' }}>₹{pp.amount}</span>
@@ -89,7 +89,7 @@ export default function AccountPage() {
           </div>
           <div style={card}>
             <div className="eyebrow" style={{ marginBottom: 14 }}>Usage history</div>
-            {history === null ? <div className="mono" style={{ fontSize: 12, color: 'var(--text-4)' }}>LOADING…</div> : history.length === 0 ? <div style={{ fontSize: 13, color: 'var(--text-3)' }}>No activity yet.</div> : history.slice(0, 40).map((h, i) => (
+            {history === null ? (<>{[0, 1, 2].map((i) => <div key={i} className="skel" style={{ height: 30, marginBottom: 6 }} />)}</>) : history.length === 0 ? <div style={{ fontSize: 13, color: 'var(--text-3)' }}>No activity yet.</div> : history.slice(0, 40).map((h, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0', borderBottom: '1px solid var(--stroke-1)', fontSize: 12.5 }}>
                 <span style={{ flex: 1, color: 'var(--text-2)' }}>{REASON[h.reason] || h.reason}</span>
                 <span className="mono" style={{ fontSize: 11, color: 'var(--text-4)' }}>{fmt(h.at)}</span>
@@ -103,9 +103,9 @@ export default function AccountPage() {
           <div style={card}>
             <div className="eyebrow" style={{ marginBottom: 14 }}>Change password</div>
             <form onSubmit={changePw}>
-              <input type="password" autoComplete="current-password" placeholder="Current password" className="input" style={inp} value={pw.current} onChange={(e) => setPw({ ...pw, current: e.target.value })} />
-              <input type="password" autoComplete="new-password" placeholder="New password (min 8 characters)" className="input" style={inp} value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} />
-              <input type="password" autoComplete="new-password" placeholder="Confirm new password" className="input" style={inp} value={pw.confirm} onChange={(e) => setPw({ ...pw, confirm: e.target.value })} />
+              <input type="password" autoComplete="current-password" aria-label="Current password" placeholder="Current password" className="input" style={inp} value={pw.current} onChange={(e) => setPw({ ...pw, current: e.target.value })} />
+              <input type="password" autoComplete="new-password" aria-label="New password" placeholder="New password (min 8 characters)" className="input" style={inp} value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} />
+              <input type="password" autoComplete="new-password" aria-label="Confirm new password" placeholder="Confirm new password" className="input" style={inp} value={pw.confirm} onChange={(e) => setPw({ ...pw, confirm: e.target.value })} />
               <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 4 }}><button type="submit" className="btn btn-iris" data-testid="change-pw">Change password</button>{pwMsg && <span style={{ fontSize: 12.5, color: pwMsg === 'Password changed.' ? 'var(--green)' : '#ffb4b4' }}>{pwMsg}</span>}</div>
             </form>
             <div style={{ borderTop: '1px solid var(--stroke-1)', margin: '18px 0 0', paddingTop: 16, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
@@ -117,7 +117,7 @@ export default function AccountPage() {
             <div className="eyebrow" style={{ marginBottom: 8, color: '#ffb4b4' }}>Danger zone</div>
             <p style={{ fontSize: 13, color: 'var(--text-2)', margin: '0 0 12px' }}>Delete your account and all data (documents, papers, tests, credits) permanently. This cannot be undone. Type your email to confirm.</p>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-              <input className="input" value={delConfirm} onChange={(e) => setDelConfirm(e.target.value)} placeholder={user ? user.email : 'your email'} style={{ flex: 1, minWidth: 200, fontSize: 13, padding: '8px 12px' }} data-testid="del-confirm" />
+              <input className="input" value={delConfirm} onChange={(e) => setDelConfirm(e.target.value)} aria-label="Type your email to confirm deletion" placeholder={user ? user.email : 'your email'} style={{ flex: 1, minWidth: 200, fontSize: 13, padding: '8px 12px' }} data-testid="del-confirm" />
               <button onClick={deleteAccount} disabled={!user || delConfirm.trim().toLowerCase() !== String(user.email).toLowerCase()} className="btn btn-glass" data-testid="delete-account" style={{ color: '#ffb4b4', borderColor: 'rgba(226,75,74,0.5)', opacity: (user && delConfirm.trim().toLowerCase() === String(user.email).toLowerCase()) ? 1 : 0.5 }}>Delete account</button>
               {delMsg && <span style={{ fontSize: 12, color: '#ffb4b4' }}>{delMsg}</span>}
             </div>

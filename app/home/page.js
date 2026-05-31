@@ -2,8 +2,8 @@
 import { useState, useEffect } from 'react';
 import AppNav from '../_components/AppNav';
 
-const DOC_ICON = <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3v5h5" /><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M9 13h6M9 17h4" /></svg>;
-const PAPER_ICON = <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="12" height="17" rx="2" /><path d="M9 4V3h6v1" /><path d="M9 10h6M9 14h4" /></svg>;
+const DOC_ICON = <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3v5h5" /><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M9 13h6M9 17h4" /></svg>;
+const PAPER_ICON = <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="12" height="17" rx="2" /><path d="M9 4V3h6v1" /><path d="M9 10h6M9 14h4" /></svg>;
 
 function Tile({ href, icon, title, desc, cta }) {
   return (
@@ -44,7 +44,7 @@ export default function HomePage() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <AppNav active="home" credits={credits} />
-      <main style={{ maxWidth: 860, margin: '0 auto', width: '100%', padding: '30px 20px 60px' }}>
+      <main id="main-content" style={{ maxWidth: 860, margin: '0 auto', width: '100%', padding: '30px 20px 60px' }}>
         {credits != null && credits < 10 && <div style={{ background: 'rgba(255,189,46,0.12)', border: '1px solid rgba(255,189,46,0.4)', borderRadius: 'var(--r)', padding: '10px 14px', marginBottom: 16, fontSize: 13.5, color: '#ffd27a', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}><span style={{ flex: 1, minWidth: 200 }}>You&rsquo;re low on credits ({credits} left).</span><a href="/buy" className="btn btn-glass btn-sm">Buy credits</a></div>}
         <h1 style={{ fontSize: 24, fontWeight: 600, margin: '0 0 3px' }}>Welcome back{name ? ', ' + name : ''}</h1>
         <div style={{ fontSize: 13.5, color: 'var(--text-3)', marginBottom: 24 }}>Pick a tool to get started.{credits != null ? ' You have ' + credits.toLocaleString('en-IN') + ' credits.' : ''}</div>
@@ -82,5 +82,5 @@ export default function HomePage() {
     </div>
   );
 }
-const DOC_ICON_S = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3v5h5" /><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /></svg>;
-const PAPER_ICON_S = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="12" height="17" rx="2" /><path d="M9 4V3h6v1" /></svg>;
+const DOC_ICON_S = <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3v5h5" /><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /></svg>;
+const PAPER_ICON_S = <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="12" height="17" rx="2" /><path d="M9 4V3h6v1" /></svg>;
